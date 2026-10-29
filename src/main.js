@@ -30,7 +30,7 @@ const I={
  note:sv('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM8.5 11h7M8.5 15h5"/>'),
  pencil:sv('<path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/>'),
  upload:sv('<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v7h14v-7"/>'),
- gear:sv('<circle cx="12" cy="12" r="3"/><path d="M12 2.8l2 .3.6 2.3 1.9 1.1 2.3-.7 1.4 1.5-.9 2.2v2.2l.9 2.2-1.4 1.5-2.3-.7-1.9 1.1-.6 2.3-2 .3-2-.3-.6-2.3-1.9-1.1-2.3.7L3.7 16l.9-2.2v-2.2L3.7 9.4l1.4-1.5 2.3.7 1.9-1.1.6-2.3z"/>'),
+ gear:sv('<path d="M19.09 10.26 L21.46 10.38 L21.46 13.62 L19.09 13.74 L18.24 15.79 L19.84 17.54 L17.54 19.84 L15.79 18.24 L13.74 19.09 L13.62 21.46 L10.38 21.46 L10.26 19.09 L8.21 18.24 L6.46 19.84 L4.16 17.54 L5.76 15.79 L4.91 13.74 L2.54 13.62 L2.54 10.38 L4.91 10.26 L5.76 8.21 L4.16 6.46 L6.46 4.16 L8.21 5.76 L10.26 4.91 L10.38 2.54 L13.62 2.54 L13.74 4.91 L15.79 5.76 L17.54 4.16 L19.84 6.46 L18.24 8.21Z" stroke-linejoin="round"/><circle cx="12" cy="12" r="3"/>'),
  chart:sv('<path d="M3 20h18M5 16l5-5 3.5 3L20 7"/>'),
  person:sv('<circle cx="12" cy="4.5" r="2"/><path d="M5 8.5h14M12 8.5v6M9 21l3-6.5 3 6.5"/>'),
  cal:sv('<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"/>'),
@@ -46,9 +46,10 @@ const I={
  moon:'<svg viewBox="0 0 24 24" class="f" style="color:#3d8af7"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>',
 };
 
+const plural=(n,w)=>`${n} ${n===1?w:w+'s'}`;
 const initials=n=>(n||'?').trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
 const thumb=e=>`<div class="thumb">${initials(e.name)}</div>`;
-const avatar=(cls='')=>`<div class="avatar ${cls}">${esc((db.profileName||'?')[0].toUpperCase())}</div>`;
+const avatar=(cls='')=>`<div class="avatar ${cls}">${db.photo?`<img src="${db.photo}" alt="">`:`<span>${esc((db.profileName||'?').trim()[0]?.toUpperCase()||'?')}</span>`}</div>`;
 const glassGroup=btns=>`<div class="glass group">${btns.map(([a,ic,l,v])=>`<button class="gbtn" data-a="${a}" ${v?`data-v="${v}"`:''} aria-label="${l}">${ic}</button>`).join('')}</div>`;
 const bigHeader=(t,right='')=>`<header class="hdr"><h1>${t}</h1>${right}</header>`;
 const subHeader=(t,right='')=>`<header class="hdr sub"><button class="glass round" data-a="back" aria-label="Back">${I.back}</button><h2>${t}</h2>${right||'<span class="round-ph"></span>'}</header>`;
@@ -86,7 +87,7 @@ function weekly(metric,n=12){const mon=new Date();mon.setHours(0,0,0,0);mon.setD
  const out=[];for(let i=n-1;i>=0;i--){const s=new Date(mon);s.setDate(s.getDate()-7*i);const e=new Date(s);e.setDate(e.getDate()+7);out.push({label:s.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),v:db.workouts.filter(w=>w.start>=+s&&w.start<+e).reduce((a,w)=>a+f(w),0)})}return out}
 function chartCard(){const m=ui.metric||'duration';const weeks=weekly(m);const max=Math.max(...weeks.map(w=>w.v));
  const unit={duration:'hours',volume:'kg',reps:'repetitions'}[m];const cur=weeks.at(-1).v;
- const body=max?`<div class="chart-top"><b>${m==='duration'?cur.toFixed(1):Math.round(cur).toLocaleString('en-GB')} ${unit}</b> <small>this week</small></div><svg class="chart" viewBox="0 0 330 150">${weeks.map((w,i)=>{const h=Math.round(w.v/max*110);return `<rect x="${i*27.5+5}" y="${125-h}" width="17" height="${h}" rx="3" class="${i===11?'cur':''}"/>${i%3===0?`<text x="${i*27.5+13}" y="145">${w.label}</text>`:''}`}).join('')}<line x1="0" x2="330" y1="125.5" y2="125.5"/></svg>`:`<div class="nodata">${I.bars}<p>No data in time period</p></div>`;
+ const body=max?`<div class="chart-top"><b>${m==='duration'?cur.toFixed(1):Math.round(cur).toLocaleString('en-GB')} ${unit}</b> <small>this week</small></div><svg class="chart" viewBox="0 0 330 150">${weeks.map((w,i)=>{const h=Math.round(w.v/max*110);return `<rect x="${i*27.5+5}" y="${125-h}" width="17" height="${h}" rx="3" class="${i===11?'cur':''}"/>${i%3===0?`<text x="${i*27.5+14}" y="143">${w.label}</text>`:''}`}).join('')}<line x1="0" x2="330" y1="125.5" y2="125.5"/></svg>`:`<div class="nodata">${I.bars}<p>No data in time period</p></div>`;
  return `<div class="range">Last 3 months ${I.down}</div><div class="chartcard">${body}</div>
  <div class="pills">${[['duration','Duration'],['volume','Volume'],['reps','Reps']].map(([k,l])=>`<button class="pill ${m===k?'on':''}" data-a="metric" data-v="${k}">${l}</button>`).join('')}</div>`}
 function profileView(){const recs=db.workouts.reduce((a,w)=>a+(w.records?.length||0),0);
@@ -128,7 +129,7 @@ function calendarPage(){const days=new Set(db.workouts.map(w=>new Date(w.start).
  <div class="dow">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<span>${d}</span>`).join('')}</div>
  <main class="scroll flush">${months.map(m=>`<h3 class="mhead">${m.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</h3><div class="mgrid">${grid(m)}</div>`).join('')}</main>`}
 function editProfilePage(){return subHeader('Edit Profile',`<button class="glass pillbtn" data-a="saveProfile">Done</button>`)+`<main class="scroll">
- <div class="center-av">${avatar('big')}<p class="blue">Your initial is used as your picture</p></div>
+ <div class="center-av">${avatar('big')}<label class="blue linkbtn">Change Picture<input type="file" id="photoFile" accept="image/*" class="vh"></label>${db.photo?'<button class="link danger" data-a="removePhoto">Remove Picture</button>':''}</div>
  <p class="ghead">Public profile data</p><div class="glist form"><label class="lrow static"><span>Name</span><input id="pname" value="${esc(db.profileName)}"></label><label class="lrow static"><span>Bio</span><input id="pbio" placeholder="Describe yourself" value="${esc(db.bio||'')}"></label></div></main>`}
 function statisticsPage(){const since=Date.now()-7*864e5;const last=db.workouts.filter(w=>w.start>=since);const mus={};db.workouts.forEach(w=>w.exercises.forEach(e=>{const m=exById(e.exId).muscle;mus[m]=(mus[m]||0)+e.sets.filter(s=>s.done).length}));const tot=Object.values(mus).reduce((a,b)=>a+b,0)||1;
  return subHeader('Statistics')+`<main class="scroll"><p class="label">Last 7 days</p><div class="two"><div class="tile"><small>Workouts</small><b>${last.length}</b></div><div class="tile"><small>Duration</small><b>${fmtDur(last.reduce((a,w)=>a+w.duration,0))}</b></div><div class="tile"><small>Volume</small><b>${last.reduce((a,w)=>a+vol(w),0).toLocaleString('en-GB')} kg</b></div><div class="tile"><small>Sets</small><b>${last.reduce((a,w)=>a+sets(w),0)}</b></div></div>
@@ -175,7 +176,7 @@ function summaryView(){const w=ui.summary;
  <div class="card"><h3>${esc(w.name)}</h3><p class="muted small">${dateStr(w.start)}</p>
  <div class="stats"><div><small>Time</small><b>${fmtDur(w.duration)}</b></div><div><small>Volume</small><b>${vol(w).toLocaleString('en-GB')} kg</b></div><div><small>Sets</small><b>${sets(w)}</b></div></div>
  ${w.records.length?`<p class="label">Personal records</p>${w.records.map(id=>`<div class="row"><span class="pr">${I.trophy}</span> ${esc(exById(id).name)} — heaviest weight ${bestWeight(id)} kg</div>`).join('')}`:''}
- ${w.exercises.map(e=>`<div class="row">${thumb(exById(e.exId))}<span>${e.sets.filter(s=>s.done).length} sets ${esc(exById(e.exId).name)}</span></div>`).join('')}</div>
+ ${w.exercises.map(e=>`<div class="row">${thumb(exById(e.exId))}<span>${plural(e.sets.filter(s=>s.done).length,'set')} ${esc(exById(e.exId).name)}</span></div>`).join('')}</div>
  <button class="btn dark wide" data-a="openShare" data-v="${w.id}">Share with a photo or video</button><button class="btn primary wide" data-a="doneSummary">Done</button></main></div>`}
 
 function render(){
@@ -201,6 +202,7 @@ const A={
  about:()=>alert('Repforge, version 1. Your own workout tracker. All data stays on this device.'),
  addMeasure:()=>{const v=parseFloat($('#bw').value.replace(',','.'));if(!(v>0))return alert('Enter your bodyweight in kilograms.');(db.measures??=[]).push({t:Date.now(),kg:v});save()},
  delMeasure:i=>{db.measures.splice(+i,1);save()},
+ removePhoto:()=>{keepProfileFields();delete db.photo;save();render()},
  saveProfile:()=>{db.profileName=$('#pname').value.trim()||'Athlete';db.bio=$('#pbio').value.trim();save();ui.pages.pop()},
  startEmpty:()=>newWorkout(timeName()),
  startRoutine:id=>{const r=db.routines.find(x=>x.id===id);newWorkout(r.name,r.exercises.map(e=>({exId:e.exId,rest:90,sets:Array.from({length:e.sets},()=>({kg:'',reps:'',done:false}))})))},
@@ -237,7 +239,10 @@ const A={
 };
 function timeName(){const h=new Date().getHours();return h<12?'Morning workout':h<18?'Afternoon workout':'Evening workout'}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]');if(!b)return;const f=A[b.dataset.a];if(!f)return;f(b.dataset.v);render()});
+function keepProfileFields(){const n=$('#pname'),b=$('#pbio');if(n)db.profileName=n.value.trim()||db.profileName;if(b)db.bio=b.value.trim()}
+function resizePhoto(file){return new Promise((ok,no)=>{const u=URL.createObjectURL(file);const im=new Image();im.onload=()=>{const S=400,s=Math.min(im.naturalWidth,im.naturalHeight);const c=document.createElement('canvas');c.width=c.height=S;c.getContext('2d').drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,S,S);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.85))};im.onerror=()=>{URL.revokeObjectURL(u);no()};im.src=u})}
 document.addEventListener('change',async ev=>{const t=ev.target;
+ if(t.id==='photoFile'&&t.files[0]){try{keepProfileFields();db.photo=await resizePhoto(t.files[0]);save();render()}catch(e){alert('That picture could not be read. Please try a different photo.')}return}
  if(t.id==='importFile'&&t.files[0]){try{const j=JSON.parse(await t.files[0].text());const d=j.data||j;if(!Array.isArray(d.workouts))throw 0;if(!confirm(`Replace the data on this device with the backup (${d.workouts.length} workouts, ${(d.routines||[]).length} routines)?`))return;localStorage.setItem(KEY,JSON.stringify(d));location.reload()}catch{alert('That file is not a valid backup.')}}
  if(t.id==='media'&&t.files[0])loadMedia(t.files[0]);});
 document.addEventListener('input',ev=>{const t=ev.target;
@@ -250,7 +255,8 @@ setInterval(()=>{
  if(ui.view==='active'){const d=$('#dur');if(d)d.textContent=fmtDur((Date.now()-db.active.start)/1000);const r=$('#restclock');if(r){r.textContent=clock((ui.rest.end-Date.now())/1000);$('.restbar .fill').style.width=Math.max(0,(ui.rest.end-Date.now())/10/ui.rest.total)+'%'}}
 },1000);
 render();
-if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js');
+if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(r=>{r.update();document.addEventListener('visibilitychange',()=>{if(!document.hidden)r.update()})});
+if('serviceWorker' in navigator&&navigator.serviceWorker.controller){let done=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!done){done=true;location.reload()}})}
 
 // ---------- Share ----------
 function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}

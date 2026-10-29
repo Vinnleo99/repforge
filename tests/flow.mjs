@@ -1,9 +1,10 @@
-import {chromium} from 'playwright';import {spawn} from 'child_process';import assert from 'assert';import fs from 'fs';
+import {chromium,webkit} from 'playwright';import {spawn} from 'child_process';import assert from 'assert';import fs from 'fs';
 const srv=spawn('npx',['vite','preview','--port','4173','--strictPort'],{stdio:'ignore'});await new Promise(r=>setTimeout(r,2500));
-const b=await chromium.launch({executablePath:'/usr/bin/google-chrome'});
+const WK=process.env.BROWSER==='webkit';const OUT=process.env.OUT||'screenshots';fs.mkdirSync(OUT,{recursive:true});
+const b=WK?await webkit.launch():await chromium.launch({executablePath:'/usr/bin/google-chrome'});
 const ctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,acceptDownloads:true});
 const p=await ctx.newPage();p.on('dialog',d=>d.accept());const errs=[];p.on('pageerror',e=>errs.push(e.message));
-const shot=n=>p.screenshot({path:`screenshots/${n}.png`});
+const shot=n=>p.screenshot({path:`${OUT}/${n}.png`});
 try{
 await p.goto('http://localhost:4173/');
 async function workout(kg,ss){await p.click('nav >> text=Workout');await p.click('text=Start Empty Workout');
@@ -29,9 +30,13 @@ assert.equal(await p.locator('.post').count(),2,'two workouts in history');asser
 await p.click('nav >> text=Profile');await shot('07-profile');
 for(const [pg,n] of [['exercises','11-exercises'],['settings','12-settings'],['calendar','13-calendar'],['measures','14-measures'],['statistics','15-statistics'],['editProfile','16-edit-profile']]){await p.click(`[data-a=page][data-v=${pg}]`);if(pg==='measures'){await p.fill('#bw','78.5');await p.click('text=Add')}await shot(n);await p.click('[data-a=back]')}
 await p.click('[data-a=metric][data-v=volume]');await p.evaluate(()=>document.querySelector('.scroll').scrollTop=0);await shot('07-profile');
+{const cen=await p.evaluate(()=>[...document.querySelectorAll('.avatar span')].map(s=>{const a=s.parentElement.getBoundingClientRect(),r=document.createRange();r.selectNodeContents(s);const b=r.getBoundingClientRect();return Math.max(Math.abs((a.left+a.width/2)-(b.left+b.width/2)),Math.abs((a.top+a.height/2)-(b.top+b.height/2)))}));console.log('avatar letter offset px',cen);assert(cen.length&&cen.every(x=>x<3))}
+await p.click('[data-a=page][data-v=editProfile]');await shot('17-edit-profile-initial');await p.setInputFiles('#photoFile','tests/photo.png');await p.waitForSelector('.avatar img');
+const sz=await p.evaluate(()=>new Promise(r=>{const i=new Image();i.onload=()=>r([i.width,i.height,JSON.parse(localStorage.getItem('repforge-data-v1')).photo.length]);i.src=document.querySelector('.avatar img').src}));console.log('photo',sz);assert(sz[0]===400&&sz[1]===400);
+await shot('18-edit-profile-photo');await p.click('[data-a=back]');await shot('19-profile-photo');
 const dl2=p.waitForEvent('download');await p.click('header [data-a=exportData]');const bk=await dl2;
-assert.equal(JSON.parse(fs.readFileSync(await bk.path(),'utf8')).data.workouts.length,2);
-const vres=await p.evaluate(async()=>{const c=document.createElement('canvas');c.width=320;c.height=240;const g=c.getContext('2d');const r=new MediaRecorder(c.captureStream(30),{mimeType:'video/webm'});const ch=[];r.ondataavailable=e=>ch.push(e.data);r.start();for(let i=0;i<45;i++){g.fillStyle=`hsl(${i*8},60%,40%)`;g.fillRect(0,0,320,240);await new Promise(q=>setTimeout(q,33))}r.stop();await new Promise(q=>r.onstop=q);return new Blob(ch).size});
-assert(vres>0);console.log('All checks passed. Video smoke bytes:',vres,'Page errors:',errs);
+{const j=JSON.parse(fs.readFileSync(await bk.path(),'utf8'));assert.equal(j.data.workouts.length,2);assert(j.data.photo.startsWith('data:image/jpeg'))}
+const vres=WK?-1:await p.evaluate(async()=>{const c=document.createElement('canvas');c.width=320;c.height=240;const g=c.getContext('2d');const r=new MediaRecorder(c.captureStream(30),{mimeType:'video/webm'});const ch=[];r.ondataavailable=e=>ch.push(e.data);r.start();for(let i=0;i<45;i++){g.fillStyle=`hsl(${i*8},60%,40%)`;g.fillRect(0,0,320,240);await new Promise(q=>setTimeout(q,33))}r.stop();await new Promise(q=>r.onstop=q);return new Blob(ch).size});
+assert(WK||vres>0);console.log('All checks passed. Video smoke bytes:',vres,'Page errors:',errs);
 }catch(e){await shot("zz-fail");throw e}finally{await b.close();srv.kill()}
 process.exit(errs.length?1:0);
