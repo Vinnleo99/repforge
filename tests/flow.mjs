@@ -1,0 +1,35 @@
+import {chromium} from 'playwright';import {spawn} from 'child_process';import assert from 'assert';import fs from 'fs';
+const srv=spawn('npx',['vite','preview','--port','4173','--strictPort'],{stdio:'ignore'});await new Promise(r=>setTimeout(r,2500));
+const b=await chromium.launch({executablePath:'/usr/bin/google-chrome'});
+const ctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,acceptDownloads:true});
+const p=await ctx.newPage();p.on('dialog',d=>d.accept());const errs=[];p.on('pageerror',e=>errs.push(e.message));
+const shot=n=>p.screenshot({path:`screenshots/${n}.png`});
+try{
+await p.goto('http://localhost:4173/');
+async function workout(kg,ss){await p.click('nav >> text=Workout');await p.click('text=Start an empty workout');
+ await p.click('text=Add exercise');await p.fill('#search','bench');await p.click('.pick >> text=Bench Press');
+ for(let i=0;i<ss;i++){if(i)await p.click('text=Add set');await p.fill(`[data-f=kg][data-i="0-${i}"]`,String(kg));await p.fill(`[data-f=reps][data-i="0-${i}"]`,'8');await p.click(`.tick[data-v="0-${i}"]`)}}
+await shot('01-home-empty');
+await workout(60,2);await p.click('text=Finish');await p.click('[data-a=doneSummary]');
+await p.click('nav >> text=Workout');await p.click('text=New routine');await p.fill('#rname','Push day');await p.click('text=Add exercise');
+await p.click('.pick >> text=Overhead Press');await p.click('text=Add exercise');await p.click('.pick >> text=Lateral Raise');await shot('06-routine-editor');await p.click('text=Save');
+await shot('02-workout-tab');
+await workout(70,3);await p.click('text=Add exercise');await shot('04-exercise-picker');await p.fill('#search','goblet');await p.click('.pick >> text=Goblet Squat');
+await p.fill('[data-f=kg][data-i="1-0"]','24');await p.fill('[data-f=reps][data-i="1-0"]','12');await p.click('.tick[data-v="1-0"]');
+assert(await p.isVisible('.restbar'),'rest timer should be visible');await shot('03-active-workout');
+await p.click('text=Finish');assert(await p.isVisible('text=Well done!'));assert(await p.isVisible('text=Personal records'),'PR expected');await shot('05-finish-summary');
+await p.click('text=Share with a photo or video');
+const q=await ctx.newPage();await q.setViewportSize({width:900,height:1200});await q.setContent('<body style="margin:0;height:1200px;background:linear-gradient(160deg,#4a6b8a,#1d2a38 60%,#0c1117)"><div style="position:absolute;left:300px;top:380px;width:300px;height:500px;border-radius:150px 150px 40px 40px;background:#22303e"></div></body>');const photo=await q.screenshot({type:'jpeg'});await q.close();
+await p.setInputFiles('input[accept="image/*,video/*"]',{name:'gym.jpg',mimeType:'image/jpeg',buffer:photo});await p.waitForTimeout(600);await shot('08-share-panel');
+await p.click('text=Centre card');await p.waitForTimeout(200);await shot('09-share-card');
+await p.click('text=Transparent sticker');await p.waitForTimeout(200);await shot('10-share-sticker');
+const dl=p.waitForEvent('download');await p.click('text=Save to device');const d=await dl;assert(d.suggestedFilename().endsWith('.png'));
+await p.click('text=Close');await p.click('[data-a=doneSummary]');
+assert.equal(await p.locator('.post').count(),2,'two workouts in history');assert(await p.isVisible('.post >> text=Personal record'));await shot('00-home-history');
+await p.click('nav >> text=Profile');await shot('07-profile');
+const dl2=p.waitForEvent('download');await p.click('text=Export backup');const bk=await dl2;
+assert.equal(JSON.parse(fs.readFileSync(await bk.path(),'utf8')).data.workouts.length,2);
+const vres=await p.evaluate(async()=>{const c=document.createElement('canvas');c.width=320;c.height=240;const g=c.getContext('2d');const r=new MediaRecorder(c.captureStream(30),{mimeType:'video/webm'});const ch=[];r.ondataavailable=e=>ch.push(e.data);r.start();for(let i=0;i<45;i++){g.fillStyle=`hsl(${i*8},60%,40%)`;g.fillRect(0,0,320,240);await new Promise(q=>setTimeout(q,33))}r.stop();await new Promise(q=>r.onstop=q);return new Blob(ch).size});
+assert(vres>0);console.log('All checks passed. Video smoke bytes:',vres,'Page errors:',errs);
+}catch(e){await shot("zz-fail");throw e}finally{await b.close();srv.kill()}
+process.exit(errs.length?1:0);
