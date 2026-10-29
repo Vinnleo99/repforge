@@ -1,6 +1,6 @@
 /* Repforge light theme, iOS Liquid Glass style. Measurements taken from 390-point reference screenshots. */
 :root{--bg:#fff;--card:#fff;--row-alt:#f7f8fa;--done:#e3f6e8;--bar:#c9dcfb;--icon:#5d6470;--sheet:#f2f2f7;--grey:#f2f4f7;--line:#e4e6e9;--text:#01091c;--muted:#84888e;--blue:#3d8af7;--green:#34c759;--gold:#f5b82e;--red:#ff3b30;
- --glass:rgba(255,255,255,.58);--glass-b:rgba(0,0,0,.10);--glass-sh:0 8px 28px rgba(0,0,0,.10),0 1px 2px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(0,0,0,.04)}
+ --glass:rgba(245,250,255,.80);--glass-f:blur(8px) saturate(130%) brightness(1.4);--glass-b:rgba(0,0,0,.10);--glass-sh:0 8px 28px rgba(0,0,0,.10),0 1px 2px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(0,0,0,.04)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",system-ui,sans-serif;height:100%;-webkit-font-smoothing:antialiased}
 #app{max-width:520px;margin:0 auto;height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
@@ -8,7 +8,7 @@ svg{width:22px;height:22px;flex:none}svg.o{fill:none;stroke:currentColor;stroke-
 button{font-family:inherit;color:inherit}
 .spacer{flex:1}.muted{color:var(--muted)}.blue{color:var(--blue)}.small{font-size:12px}.pad16{padding:0 16px}
 /* glass */
-.glass{background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(190%);backdrop-filter:blur(16px) saturate(190%);border:.5px solid var(--glass-b);box-shadow:var(--glass-sh)}
+.glass{background:var(--glass);-webkit-backdrop-filter:var(--glass-f);backdrop-filter:var(--glass-f);border:.5px solid var(--glass-b);box-shadow:var(--glass-sh)}
 /* headers */
 .hdr{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 8px) 16px 8px;min-height:62px;background:var(--bg);position:relative;z-index:2}
 .hdr h1{font-size:23px;font-weight:700;margin:0;flex:1;letter-spacing:-.3px}
@@ -148,7 +148,7 @@ b.big{display:block;font-size:28px;font-weight:600}
 @media (prefers-color-scheme:dark){
  :root{--bg:#000;--card:#1c1c1e;--grey:#2c2c2e;--line:#38383a;--text:#fff;--muted:#98989f;--blue:#0a84ff;--green:#30d158;--red:#ff453a;--gold:#ffd60a;
   --row-alt:#1c1c1e;--done:#16341f;--bar:#1f3b63;--icon:#c7c7cc;--sheet:#2c2c2e;
-  --glass:rgba(30,30,32,.58);--glass-b:rgba(255,255,255,.14);--glass-sh:0 8px 28px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);color-scheme:dark}
+  --glass:rgba(30,30,32,.80);--glass-f:blur(8px) saturate(130%) brightness(.9);--glass-b:rgba(255,255,255,.14);--glass-sh:0 8px 28px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);color-scheme:dark}
  .tabs .on{background:rgba(120,120,128,.32)}
  .dlg-scrim{background:rgba(0,0,0,.6)}
 }
