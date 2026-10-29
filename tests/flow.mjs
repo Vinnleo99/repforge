@@ -27,7 +27,7 @@ await p.click('text=Transparent sticker');await p.waitForTimeout(200);await shot
 const dl=p.waitForEvent('download');await p.click('text=Save to device');const d=await dl;assert(d.suggestedFilename().endsWith('.png'));
 await p.click('text=Close');await p.click('[data-a=doneSummary]');
 assert.equal(await p.locator('.post').count(),2,'two workouts in history');assert(await p.isVisible('.post .medal, .post >> text=record'));await shot('00-home-history');
-await p.click('nav >> text=Profile');await shot('07-profile');
+await p.evaluate(()=>document.querySelector('.scroll').scrollTop=260);await p.waitForTimeout(150);await shot('23-home-scrolled');await p.click('nav >> text=Profile');await shot('07-profile');await p.evaluate(()=>document.querySelector('.scroll').scrollTop=180);await p.waitForTimeout(150);await shot('24-profile-scrolled');
 for(const [pg,n] of [['exercises','11-exercises'],['settings','12-settings'],['calendar','13-calendar'],['measures','14-measures'],['statistics','15-statistics'],['editProfile','16-edit-profile']]){await p.click(`[data-a=page][data-v=${pg}]`);if(pg==='measures'){await p.fill('#bw','78.5');await p.click('text=Add')}await shot(n);await p.click('[data-a=back]')}
 await p.click('[data-a=metric][data-v=volume]');await p.evaluate(()=>document.querySelector('.scroll').scrollTop=0);await shot('07-profile');
 {const cen=await p.evaluate(()=>[...document.querySelectorAll('.avatar span')].map(s=>{const a=s.parentElement.getBoundingClientRect(),r=document.createRange();r.selectNodeContents(s);const b=r.getBoundingClientRect();return Math.max(Math.abs((a.left+a.width/2)-(b.left+b.width/2)),Math.abs((a.top+a.height/2)-(b.top+b.height/2)))}));console.log('avatar letter offset px',cen);assert(cen.length&&cen.every(x=>x<3))}
