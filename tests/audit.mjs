@@ -1,7 +1,7 @@
 // WebKit layout audit: icon geometry, text overflow, off-centre circles
-import {webkit} from 'playwright';import {spawn} from 'child_process';
+import {webkit,chromium} from 'playwright';import {spawn} from 'child_process';
 const srv=spawn('npx',['vite','preview','--port','4174','--strictPort'],{stdio:'ignore'});await new Promise(r=>setTimeout(r,2500));
-const b=await webkit.launch();const p=await (await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2})).newPage();
+const b=process.env.BROWSER==='chromium'?await chromium.launch({executablePath:'/usr/bin/google-chrome'}):await webkit.launch();const p=await (await b.newContext({colorScheme:process.env.SCHEME||'light',viewport:{width:390,height:844},deviceScaleFactor:2})).newPage();
 await p.goto('http://localhost:4174/');
 await p.evaluate(()=>{localStorage.setItem('repforge-data-v1',JSON.stringify({profileName:'Victricius',routines:[],workouts:[{id:'a',name:'Afternoon workout',start:Date.now()-4e6,duration:3600,exercises:[{exId:'bench',sets:[{kg:60,reps:8,done:true}]}],records:[]}],active:null}))});await p.reload();
 const check=()=>p.evaluate(()=>{const out=[];

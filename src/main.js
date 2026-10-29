@@ -1,3 +1,5 @@
+import {exThumb} from './icons.js';
+import {alertBox,confirmBox,promptBox,sheetBox} from './dialog.js';
 import './style.css';
 import { EXERCISES } from './exercises.js';
 import { stats, draw, SIZE, recordVideo } from './share.js';
@@ -48,7 +50,7 @@ const I={
 
 const plural=(n,w)=>`${n} ${n===1?w:w+'s'}`;
 const initials=n=>(n||'?').trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
-const thumb=e=>`<div class="thumb">${initials(e.name)}</div>`;
+const thumb=e=>exThumb(e);
 const avatar=(cls='')=>`<div class="avatar ${cls}">${db.photo?`<img src="${db.photo}" alt="">`:`<span>${esc((db.profileName||'?').trim()[0]?.toUpperCase()||'?')}</span>`}</div>`;
 const glassGroup=btns=>`<div class="glass group">${btns.map(([a,ic,l,v])=>`<button class="gbtn" data-a="${a}" ${v?`data-v="${v}"`:''} aria-label="${l}">${ic}</button>`).join('')}</div>`;
 const bigHeader=(t,right='')=>`<header class="hdr"><h1>${t}</h1>${right}</header>`;
@@ -87,7 +89,7 @@ function weekly(metric,n=12){const mon=new Date();mon.setHours(0,0,0,0);mon.setD
  const out=[];for(let i=n-1;i>=0;i--){const s=new Date(mon);s.setDate(s.getDate()-7*i);const e=new Date(s);e.setDate(e.getDate()+7);out.push({label:s.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),v:db.workouts.filter(w=>w.start>=+s&&w.start<+e).reduce((a,w)=>a+f(w),0)})}return out}
 function chartCard(){const m=ui.metric||'duration';const weeks=weekly(m);const max=Math.max(...weeks.map(w=>w.v));
  const unit={duration:'hours',volume:'kg',reps:'repetitions'}[m];const cur=weeks.at(-1).v;
- const body=max?`<div class="chart-top"><b>${m==='duration'?cur.toFixed(1):Math.round(cur).toLocaleString('en-GB')} ${unit}</b> <small>this week</small></div><svg class="chart" viewBox="0 0 330 150">${weeks.map((w,i)=>{const h=Math.round(w.v/max*110);return `<rect x="${i*27.5+5}" y="${125-h}" width="17" height="${h}" rx="3" class="${i===11?'cur':''}"/>${i%3===0?`<text x="${i*27.5+14}" y="143">${w.label}</text>`:''}`}).join('')}<line x1="0" x2="330" y1="125.5" y2="125.5"/></svg>`:`<div class="nodata">${I.bars}<p>No data in time period</p></div>`;
+ const body=max?`<div class="chart-top"><b>${m==='duration'?cur.toFixed(1):Math.round(cur).toLocaleString('en-GB')} ${unit}</b> <small>this week</small></div><svg class="chart" viewBox="0 0 330 150">${weeks.map((w,i)=>{const h=Math.round(w.v/max*110);return `<rect x="${i*27.5+5}" y="${125-h}" width="17" height="${h}" rx="3" class="${i===11?'cur':''}"/>${i%3===0?`<text x="${i*27.5+5}" y="143">${w.label}</text>`:''}`}).join('')}<line x1="0" x2="330" y1="125.5" y2="125.5"/></svg>`:`<div class="nodata">${I.bars}<p>No data in time period</p></div>`;
  return `<div class="range">Last 3 months ${I.down}</div><div class="chartcard">${body}</div>
  <div class="pills">${[['duration','Duration'],['volume','Volume'],['reps','Reps']].map(([k,l])=>`<button class="pill ${m===k?'on':''}" data-a="metric" data-v="${k}">${l}</button>`).join('')}</div>`}
 function profileView(){const recs=db.workouts.reduce((a,w)=>a+(w.records?.length||0),0);
@@ -197,10 +199,10 @@ const A={
  cycleMuscle:()=>{const m=['All',...new Set(EXERCISES.map(e=>e.muscle))];ui.muscle=m[(m.indexOf(ui.muscle)+1)%m.length]},
  cycleEquip:()=>{const m=['All',...new Set(EXERCISES.map(e=>e.equipment))];ui.equip=m[(m.indexOf(ui.equip)+1)%m.length]},
  like:id=>{const w=db.workouts.find(x=>x.id===id);w.liked=!w.liked;save()},
- comment:id=>{const w=db.workouts.find(x=>x.id===id);const c=prompt('Add a comment to this workout',w.comment||'');if(c!==null){w.comment=c;save()}},
+ comment:async id=>{const w=db.workouts.find(x=>x.id===id);const c=await promptBox('Add a comment',w.comment||'','Write a comment');if(c!==null){w.comment=c;save()}},
  defaultRest:()=>{const o=[0,30,60,90,120,180];db.defaultRest=o[(o.indexOf(db.defaultRest??90)+1)%o.length];save()},
- about:()=>alert('Repforge, version 1. Your own workout tracker. All data stays on this device.'),
- addMeasure:()=>{const v=parseFloat($('#bw').value.replace(',','.'));if(!(v>0))return alert('Enter your bodyweight in kilograms.');(db.measures??=[]).push({t:Date.now(),kg:v});save()},
+ about:()=>alertBox('Repforge','Version 1. Your own workout tracker. All data stays on this device.'),
+ addMeasure:()=>{const v=parseFloat($('#bw').value.replace(',','.'));if(!(v>0))return alertBox('Bodyweight needed','Enter your bodyweight in kilograms.');(db.measures??=[]).push({t:Date.now(),kg:v});save()},
  delMeasure:i=>{db.measures.splice(+i,1);save()},
  removePhoto:()=>{keepProfileFields();delete db.photo;save();render()},
  saveProfile:()=>{db.profileName=$('#pname').value.trim()||'Athlete';db.bio=$('#pbio').value.trim();save();ui.pages.pop()},
@@ -212,16 +214,16 @@ const A={
  muscle:v=>{ui.muscle=v},
  pick:id=>{if(ui.picker==='workout'){db.active.exercises.push({exId:id,rest:db.defaultRest??90,sets:[{kg:'',reps:'',done:false}]});save();ui.view='active'}else{ui.routineDraft.exercises.push({exId:id,sets:3});ui.view='routine'}},
  addSet:i=>{const e=db.active.exercises[i];const l=e.sets.at(-1);e.sets.push({kg:l?.kg||'',reps:l?.reps||'',done:false});save()},
- removeEx:i=>{if(confirm('Remove this exercise from the workout?')){db.active.exercises.splice(+i,1);save()}},
+ removeEx:async i=>{if(await sheetBox(null,'Remove this exercise from the workout?','Remove Exercise')){db.active.exercises.splice(+i,1);save()}},
  restChange:i=>{const e=db.active.exercises[i];const opts=[0,30,60,90,120,180];e.rest=opts[(opts.indexOf(e.rest??90)+1)%opts.length];save()},
  tick:v=>{const[ei,si]=v.split('-').map(Number);const e=db.active.exercises[ei],s=e.sets[si];
   if(!s.done){const p=previousFor(e.exId)[si];if(s.kg===''&&p)s.kg=p.kg;if(s.reps===''&&p)s.reps=p.reps;if(s.kg==='')s.kg='0';if(s.reps==='')s.reps='0'}
   s.done=!s.done;save();if(s.done&&(e.rest??90)>0){const t=e.rest??90;ui.rest={end:Date.now()+t*1000,total:t}}},
  rest:d=>{ui.rest.end+=d*1000;ui.rest.total=Math.max(ui.rest.total,(ui.rest.end-Date.now())/1000)},skipRest:()=>{ui.rest=null},
- settings:()=>{const n=prompt('Workout title',db.active.name);if(n){db.active.name=n;save()}},
- discard:()=>{if(confirm('Discard this workout? It will not be saved.')){db.active=null;ui.rest=null;save();ui.view=null}},
+ settings:async()=>{const n=(await promptBox('Workout title',db.active.name,'Workout title'))?.trim();if(n){db.active.name=n;save()}},
+ discard:async()=>{if(await sheetBox(null,'Are you sure you want to discard this workout? It will not be saved.','Discard Workout')){db.active=null;ui.rest=null;save();ui.view=null}},
  finish:()=>{const w=db.active;w.exercises.forEach(e=>e.sets=e.sets.filter(s=>s.done));w.exercises=w.exercises.filter(e=>e.sets.length);
-  if(!w.exercises.length){alert('Tick at least one set before finishing.');return}
+  if(!w.exercises.length){alertBox('No completed sets','Tick at least one set before finishing.');return}
   w.duration=Math.round((Date.now()-w.start)/1000);w.id='w'+Date.now();
   w.records=w.exercises.filter(e=>{const b=bestWeight(e.exId);return b>0&&Math.max(...e.sets.map(s=>+s.kg||0))>b}).map(e=>e.exId);
   db.workouts.push(w);db.active=null;ui.rest=null;save();ui.summary=w;ui.view='summary'},
@@ -234,16 +236,16 @@ const A={
  rRemove:i=>{ui.routineDraft.exercises.splice(+i,1)},
  rSets:v=>{const[i,d]=v.split('|').map(Number);const e=ui.routineDraft.exercises[i];e.sets=Math.max(1,e.sets+d)},
  saveRoutine:()=>{const r=ui.routineDraft;r.name=$('#rname').value.trim()||'Untitled routine';const{isNew,...clean}=r;const i=db.routines.findIndex(x=>x.id===r.id);if(i>=0)db.routines[i]=clean;else db.routines.push(clean);save();ui.view=null;ui.tab='workout';ui.pages=[]},
- rDelete:()=>{if(confirm('Delete this routine?')){db.routines=db.routines.filter(x=>x.id!==ui.routineDraft.id);save();ui.view=null}},
- resetData:()=>{if(confirm('Delete every workout and routine on this device?')){localStorage.removeItem(KEY);location.reload()}},
+ rDelete:async()=>{if(await sheetBox(null,'Delete this routine? This cannot be undone.','Delete Routine')){db.routines=db.routines.filter(x=>x.id!==ui.routineDraft.id);save();ui.view=null}},
+ resetData:async()=>{if(await confirmBox('Delete all data?','Every workout, routine and measurement on this device will be deleted. Export a backup first if you want to keep them.','Delete',true)){localStorage.removeItem(KEY);location.reload()}},
 };
 function timeName(){const h=new Date().getHours();return h<12?'Morning workout':h<18?'Afternoon workout':'Evening workout'}
-document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]');if(!b)return;const f=A[b.dataset.a];if(!f)return;f(b.dataset.v);render()});
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]');if(!b)return;const f=A[b.dataset.a];if(!f)return;const r=f(b.dataset.v);render();if(r?.then)r.then(render)});
 function keepProfileFields(){const n=$('#pname'),b=$('#pbio');if(n)db.profileName=n.value.trim()||db.profileName;if(b)db.bio=b.value.trim()}
 function resizePhoto(file){return new Promise((ok,no)=>{const u=URL.createObjectURL(file);const im=new Image();im.onload=()=>{const S=400,s=Math.min(im.naturalWidth,im.naturalHeight);const c=document.createElement('canvas');c.width=c.height=S;c.getContext('2d').drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,S,S);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.85))};im.onerror=()=>{URL.revokeObjectURL(u);no()};im.src=u})}
 document.addEventListener('change',async ev=>{const t=ev.target;
- if(t.id==='photoFile'&&t.files[0]){try{keepProfileFields();db.photo=await resizePhoto(t.files[0]);save();render()}catch(e){alert('That picture could not be read. Please try a different photo.')}return}
- if(t.id==='importFile'&&t.files[0]){try{const j=JSON.parse(await t.files[0].text());const d=j.data||j;if(!Array.isArray(d.workouts))throw 0;if(!confirm(`Replace the data on this device with the backup (${d.workouts.length} workouts, ${(d.routines||[]).length} routines)?`))return;localStorage.setItem(KEY,JSON.stringify(d));location.reload()}catch{alert('That file is not a valid backup.')}}
+ if(t.id==='photoFile'&&t.files[0]){try{keepProfileFields();db.photo=await resizePhoto(t.files[0]);save();render()}catch(e){alertBox('Picture not read','That picture could not be read. Please try a different photo.')}return}
+ if(t.id==='importFile'&&t.files[0]){try{const j=JSON.parse(await t.files[0].text());const d=j.data||j;if(!Array.isArray(d.workouts))throw 0;if(!await confirmBox('Import backup?',`Replace the data on this device with the backup (${d.workouts.length} workouts, ${(d.routines||[]).length} routines)?`,'Replace',true))return;localStorage.setItem(KEY,JSON.stringify(d));location.reload()}catch{alertBox('Backup not imported','That file is not a valid Repforge backup.')}}
  if(t.id==='media'&&t.files[0])loadMedia(t.files[0]);});
 document.addEventListener('input',ev=>{const t=ev.target;
  if(t.dataset.f){const[ei,si]=t.dataset.i.split('-').map(Number);db.active.exercises[ei].sets[si][t.dataset.f]=t.value.replace(',','.');save();const vv=$('#wvol');if(vv)vv.textContent=vol(db.active).toLocaleString('en-GB')+' kg'}
@@ -283,7 +285,7 @@ async function makeBlob(){const c=$('#sc');
   shareState.busy='';render();paint();return{blob,name:`repforge-workout.${blob.type.includes('mp4')?'mp4':'webm'}`}}
  const blob=await new Promise(r=>c.toBlob(r,'image/png'));return{blob,name:shareState.sticker?'repforge-sticker.png':'repforge-workout.png'}}
 async function shareOut(saveOnly){try{const{blob,name}=await makeBlob();const file=new File([blob],name,{type:blob.type});
- if(!saveOnly&&navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:ui.share.name})}else download(blob,name)}catch(e){if(e.name!=='AbortError')alert('Could not share: '+e.message)}}
+ if(!saveOnly&&navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:ui.share.name})}else download(blob,name)}catch(e){if(e.name!=='AbortError')alertBox('Could not share',e.message)}}
 const SHARE={
  openShare:id=>{ui.share=db.workouts.find(w=>w.id===id);Object.assign(shareState,{media:null,isVideo:false,busy:''});ui.backFrom=ui.view;ui.view='share';setTimeout(paint)},
  closeShare:()=>{ui.view=ui.backFrom==='summary'?'summary':null},
