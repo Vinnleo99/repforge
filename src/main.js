@@ -4,7 +4,7 @@ import { stats, draw, SIZE, recordVideo } from './share.js';
 const KEY='repforge-data-v1';
 const db=Object.assign({workouts:[],routines:[],active:null,profileName:'Victricius'},JSON.parse(localStorage.getItem(KEY)||'{}'));
 const save=()=>localStorage.setItem(KEY,JSON.stringify(db));
-const ui={share:null,tab:'home',view:null,picker:null,search:'',muscle:'All',routineDraft:null,summary:null,rest:null};
+const ui={pages:[],metric:'duration',equip:'All',share:null,tab:'home',view:null,picker:null,search:'',muscle:'All',routineDraft:null,summary:null,rest:null};
 const exById=id=>EXERCISES.find(e=>e.id===id)||{name:id,muscle:'',equipment:''};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -13,74 +13,132 @@ const clock=s=>{s=Math.max(0,Math.floor(s));return `${Math.floor(s/60)}:${String
 const vol=w=>w.exercises.reduce((a,e)=>a+e.sets.filter(s=>s.done).reduce((b,s)=>b+(+s.kg||0)*(+s.reps||0),0),0);
 const sets=w=>w.exercises.reduce((a,e)=>a+e.sets.filter(s=>s.done).length,0);
 const dateStr=t=>new Date(t).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const sv=p=>`<svg viewBox="0 0 24 24" class="o">${p}</svg>`;
 const I={
- home:'<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
- dumbbell:'<svg viewBox="0 0 24 24"><path d="M2 10h2v4H2zM5 7h3v10H5zM16 7h3v10h-3zM20 10h2v4h-2zM8 11h8v2H8z"/></svg>',
- user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7z"/></svg>',
- check:'<svg viewBox="0 0 24 24"><path d="M9 16.2l-4.2-4.2-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>',
- trophy:'<svg viewBox="0 0 24 24"><path d="M7 3h10v2h4v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 15v3h4v3H7v-3h4v-3a5 5 0 0 1-3.7-3H7a4 4 0 0 1-4-4V5h4zm-2 4v1a2 2 0 0 0 2 2V7zm14 0h-2v3a2 2 0 0 0 2-2z"/></svg>',
- clock:'<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.4l3.5 2.1-.8 1.3L11 13V7h2z"/></svg>',
- plus:'<svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>',
- search:'<svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 0 1 5.6 11.2l5 5-1.4 1.4-5-5A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/></svg>',
- back:'<svg viewBox="0 0 24 24"><path d="M15.4 5.4L14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>',
- dots:'<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
- note:'<svg viewBox="0 0 24 24"><path d="M4 4h16v12l-4 4H4zm2 2v12h9v-3h3V6z"/></svg>',
+ home:sv('<path d="M3.5 10.5 12 3.8l8.5 6.7V20a1 1 0 0 1-1 1h-5v-6h-5v6h-5a1 1 0 0 1-1-1z"/>'),
+ dumbbell:sv('<path d="M3 9.5v5M6 7v10M18 7v10M21 9.5v5M6 12h12"/>'),
+ user:sv('<circle cx="12" cy="8" r="4"/><path d="M4.5 21c.6-4 3.7-6 7.5-6s6.9 2 7.5 6"/>'),
+ check:sv('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+ trophy:'<svg viewBox="0 0 24 24" class="f"><circle cx="12" cy="9" r="6"/><path d="M8.5 14l-1.5 7 5-2.5 5 2.5-1.5-7z"/></svg>',
+ clock:sv('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+ plus:sv('<path d="M12 5v14M5 12h14"/>'),
+ search:sv('<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/>'),
+ back:sv('<path d="M20 12H4M10 6l-6 6 6 6"/>'),
+ chev:sv('<path d="M9 5l7 7-7 7"/>'),
+ down:sv('<path d="M6 9l6 6 6-6"/>'),
+ dots:'<svg viewBox="0 0 24 24" class="f"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>',
+ note:sv('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM8.5 11h7M8.5 15h5"/>'),
+ pencil:sv('<path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/>'),
+ upload:sv('<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v7h14v-7"/>'),
+ gear:sv('<circle cx="12" cy="12" r="3"/><path d="M12 2.8l2 .3.6 2.3 1.9 1.1 2.3-.7 1.4 1.5-.9 2.2v2.2l.9 2.2-1.4 1.5-2.3-.7-1.9 1.1-.6 2.3-2 .3-2-.3-.6-2.3-1.9-1.1-2.3.7L3.7 16l.9-2.2v-2.2L3.7 9.4l1.4-1.5 2.3.7 1.9-1.1.6-2.3z"/>'),
+ chart:sv('<path d="M3 20h18M5 16l5-5 3.5 3L20 7"/>'),
+ person:sv('<circle cx="12" cy="4.5" r="2"/><path d="M5 8.5h14M12 8.5v6M9 21l3-6.5 3 6.5"/>'),
+ cal:sv('<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"/>'),
+ like:sv('<path d="M7.5 10.5V20H4v-9.5zM7.5 10.5 11 3.5c1.8 0 2.7 1.2 2.3 3L12.8 9H19a1.5 1.5 0 0 1 1.5 1.8l-1.6 7.7A2 2 0 0 1 17 20H7.5"/>'),
+ comment:sv('<path d="M12 4c4.7 0 8.5 3.2 8.5 7.2s-3.8 7.2-8.5 7.2c-1 0-2-.1-2.9-.4L4 20l1.4-4A6.8 6.8 0 0 1 3.5 11.2C3.5 7.2 7.3 4 12 4z"/>'),
+ bars:sv('<rect x="5" y="12" width="3.5" height="8" rx="1"/><rect x="10.3" y="8" width="3.5" height="12" rx="1"/><rect x="15.6" y="4" width="3.5" height="16" rx="1"/>'),
+ info:sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5h.01"/>'),
+ download:sv('<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 15v5h14v-5"/>'),
+ trash:sv('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'),
+ timer:sv('<circle cx="12" cy="13" r="8"/><path d="M12 9v4M9.5 2.5h5"/>'),
+ scale:sv('<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 9a5 5 0 0 1 8 0l-3 3"/>'),
+ flame:'<svg viewBox="0 0 24 24" class="f" style="color:#f4511e"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-4.5 2-7 2 1 2.5 3 2.5 3S13 6 12 2z"/></svg>',
+ moon:'<svg viewBox="0 0 24 24" class="f" style="color:#3d8af7"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>',
 };
-const initials=n=>n.split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
-const thumb=e=>`<div class="thumb">${initials(e.name)}</div>`;
 
+const initials=n=>(n||'?').trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
+const thumb=e=>`<div class="thumb">${initials(e.name)}</div>`;
+const avatar=(cls='')=>`<div class="avatar ${cls}">${esc((db.profileName||'?')[0].toUpperCase())}</div>`;
+const glassGroup=btns=>`<div class="glass group">${btns.map(([a,ic,l,v])=>`<button class="gbtn" data-a="${a}" ${v?`data-v="${v}"`:''} aria-label="${l}">${ic}</button>`).join('')}</div>`;
+const bigHeader=(t,right='')=>`<header class="hdr"><h1>${t}</h1>${right}</header>`;
+const subHeader=(t,right='')=>`<header class="hdr sub"><button class="glass round" data-a="back" aria-label="Back">${I.back}</button><h2>${t}</h2>${right||'<span class="round-ph"></span>'}</header>`;
+const ago=t=>{const d=Math.floor((Date.now()-t)/864e5);return d<1?'Today':d===1?'Yesterday':d<7?`${d} days ago`:new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})};
 function previousFor(exId){for(let i=db.workouts.length-1;i>=0;i--){const e=db.workouts[i].exercises.find(x=>x.exId===exId);if(e){const d=e.sets.filter(s=>s.done);if(d.length)return d}}return[]}
 function bestWeight(exId,beforeIdx=db.workouts.length){let b=0;db.workouts.slice(0,beforeIdx).forEach(w=>w.exercises.filter(e=>e.exId===exId).forEach(e=>e.sets.filter(s=>s.done).forEach(s=>b=Math.max(b,+s.kg||0))));return b}
 
-// ---------- Home ----------
-function homeView(){
- const ws=[...db.workouts].reverse();
- return `<header class="top"><h1>Home</h1></header><main class="scroll">
- ${ws.length?'':`<div class="empty">${I.dumbbell}<h2>No workouts yet</h2><p>Your finished workouts will appear here.</p><button class="btn primary" data-a="tab" data-v="workout">Start your first workout</button></div>`}
- ${ws.map(w=>`<article class="card post">
-  <div class="post-head"><div class="avatar">${initials(db.profileName)}</div><div><b>${esc(db.profileName)}</b><small>${dateStr(w.start)}</small></div></div>
-  <div class="rt-head"><h3>${esc(w.name)}</h3><button class="btn dark sm" data-a="openShare" data-v="${w.id}">Share</button></div>
-  <div class="stats"><div><small>Time</small><b>${fmtDur(w.duration)}</b></div><div><small>Volume</small><b>${vol(w).toLocaleString('en-GB')} kg</b></div><div><small>Sets</small><b>${sets(w)}</b></div>${w.records?.length?`<div><small>Records</small><b class="gold">${I.trophy}${w.records.length}</b></div>`:''}</div>
-  <div class="post-ex">${w.exercises.map(e=>{const x=exById(e.exId);const n=e.sets.filter(s=>s.done).length;return `<div class="row">${thumb(x)}<span>${n} ${n===1?'set':'sets'} ${esc(x.name)}</span>${w.records?.includes(e.exId)?'<span class="pr">'+I.trophy+'Personal record</span>':''}</div>`}).join('')}</div>
- </article>`).join('')}
- </main>`;
-}
-// ---------- Workout tab ----------
+function feedCard(w){const more=w.exercises.length-3;
+ return `<article class="post">
+  <div class="post-head">${avatar()}<div><b>${esc(db.profileName)}</b><small>${ago(w.start)}</small></div><span class="spacer"></span><button class="icon" data-a="openShare" data-v="${w.id}" aria-label="More">${I.dots}</button></div>
+  <h3>${esc(w.name)}</h3>
+  <div class="stats"><div><small>Time</small><b>${fmtDur(w.duration)}</b></div><div><small>Volume</small><b>${vol(w).toLocaleString('en-GB')} kg</b></div><div><small>Records</small><b>${w.records?.length?`<span class="medal">${I.trophy}</span> ${w.records.length}`:'0'}</b></div></div>
+  <div class="post-ex">${w.exercises.slice(0,3).map(e=>{const x=exById(e.exId);const n=e.sets.filter(s=>s.done).length;return `<div class="row">${thumb(x)}<span>${n} ${n===1?'set':'sets'} ${esc(x.name)}</span>${w.records?.includes(e.exId)?`<span class="medal">${I.trophy}</span>`:''}</div>`}).join('')}
+  ${more>0?`<p class="see">See ${more} more ${more===1?'exercise':'exercises'}</p>`:''}</div>
+  ${w.comment?`<p class="comment">${esc(w.comment)}</p>`:''}
+  <div class="actions"><button class="icon ${w.liked?'liked':''}" data-a="like" data-v="${w.id}" aria-label="Like">${I.like}</button><button class="icon" data-a="comment" data-v="${w.id}" aria-label="Comment">${I.comment}</button><button class="icon" data-a="openShare" data-v="${w.id}" aria-label="Share">${I.upload}</button></div>
+ </article>`}
+function homeView(){const ws=[...db.workouts].reverse();
+ return bigHeader('Home',glassGroup([['page',I.search,'Exercises','exercises'],['page',I.cal,'Calendar','calendar']]))+`<main class="scroll flush">
+ ${ws.length?ws.map(feedCard).join('<div class="sep"></div>'):`<div class="empty">${I.dumbbell}<h2>No workouts yet</h2><p>Your finished workouts will appear here.</p><button class="btn primary" data-a="tab" data-v="workout">Start your first workout</button></div>`}
+ </main>`}
 function workoutTabView(){
- return `<header class="top"><h1>Workout</h1></header><main class="scroll">
- <p class="label">Quick start</p>
- <button class="btn wide dark" data-a="startEmpty">${I.plus} Start an empty workout</button>
- <div class="label-row"><p class="label">Routines</p></div>
- <div class="two"><button class="btn dark" data-a="newRoutine">${I.note} New routine</button><button class="btn dark" data-a="tab" data-v="profile">${I.search} Explore statistics</button></div>
- <p class="label">My routines (${db.routines.length})</p>
- ${db.routines.length?'':'<p class="muted pad">Create a routine to start a planned workout with one tap.</p>'}
- ${db.routines.map(r=>`<div class="card routine"><div class="rt-head"><h3>${esc(r.name)}</h3><button class="icon" data-a="editRoutine" data-v="${r.id}" aria-label="Edit routine">${I.dots}</button></div>
-   <p class="muted">${r.exercises.map(e=>esc(exById(e.exId).name)).join(', ')||'No exercises'}</p>
-   <button class="btn primary wide" data-a="startRoutine" data-v="${r.id}">Start routine</button></div>`).join('')}
- ${db.active?`<div class="resume" data-a="openActive">Workout in progress · ${fmtDur((Date.now()-db.active.start)/1000)} <b>Resume</b></div>`:''}
- </main>`;
-}
+ return bigHeader('Workout')+`<main class="scroll">
+ <button class="btn grey wide left" data-a="startEmpty">${I.plus} Start Empty Workout</button>
+ <div class="sec-row"><h3>Routines</h3></div>
+ <div class="two"><button class="btn grey left" data-a="newRoutine">${I.note} New Routine</button><button class="btn grey left" data-a="page" data-v="exercises">${I.search} Explore</button></div>
+ <p class="label">${I.down} My Routines (${db.routines.length})</p>
+ ${db.routines.length?'':'<p class="muted">Create a routine to start a planned workout with one tap.</p>'}
+ ${db.routines.map(r=>`<div class="routine"><div class="rt-head"><h3>${esc(r.name)}</h3><button class="icon" data-a="editRoutine" data-v="${r.id}" aria-label="Edit routine">${I.dots}</button></div>
+   <p class="clamp">${r.exercises.map(e=>esc(exById(e.exId).name)).join(', ')||'No exercises'}</p>
+   <button class="btn primary wide" data-a="startRoutine" data-v="${r.id}">Start Routine</button></div>`).join('')}
+ </main>`}
 // ---------- Profile ----------
-function weeklyVolume(){const now=new Date();const mon=new Date(now);mon.setHours(0,0,0,0);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
- const weeks=[];for(let i=7;i>=0;i--){const s=new Date(mon);s.setDate(s.getDate()-7*i);const e=new Date(s);e.setDate(e.getDate()+7);weeks.push({label:s.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),v:db.workouts.filter(w=>w.start>=+s&&w.start<+e).reduce((a,w)=>a+vol(w),0)})}return weeks}
-function profileView(){
- const weeks=weeklyVolume();const max=Math.max(1,...weeks.map(w=>w.v));
- const total=db.workouts.reduce((a,w)=>a+vol(w),0), time=db.workouts.reduce((a,w)=>a+w.duration,0);
- const recs=db.workouts.reduce((a,w)=>a+(w.records?.length||0),0);
- const bar=(w,i)=>{const h=Math.round(w.v/max*120);return `<g><rect x="${i*40+8}" y="${140-h}" width="24" height="${h}" rx="4" class="${i===7?'cur':''}"/><text x="${i*40+20}" y="158">${w.label.split(' ')[0]}</text></g>`};
- return `<header class="top"><h1>Profile</h1></header><main class="scroll">
- <div class="prof"><div class="avatar big">${initials(db.profileName)}</div><div><h2>${esc(db.profileName)}</h2><div class="pstats"><div><small>Workouts</small><b>${db.workouts.length}</b></div><div><small>Records</small><b>${recs}</b></div><div><small>Routines</small><b>${db.routines.length}</b></div></div></div></div>
- <div class="card"><div class="chart-head"><div><b>${weeks[7].v.toLocaleString('en-GB')} kg</b><small> this week</small></div><span class="chip on">Volume</span></div>
- <svg class="chart" viewBox="0 0 320 165">${weeks.map(bar).join('')}</svg><p class="muted small">Weekly volume (weight × repetitions) over the last eight weeks</p></div>
- <div class="two"><div class="card tile"><small>Total volume</small><b>${total.toLocaleString('en-GB')} kg</b></div><div class="card tile"><small>Total time</small><b>${fmtDur(time)}</b></div></div>
- <p class="label">Backup</p><p class="muted small pad">Your data lives only on this phone. iPhone can clear website data, so export a backup now and then.</p><div class="two"><button class="btn dark" data-a="exportData">Export backup</button><label class="btn dark">Import backup<input type="file" id="importFile" accept="application/json,.json" hidden></label></div>
- <button class="btn dark wide" data-a="resetData">Delete all data on this device</button>
- </main>`;
-}
+function weekly(metric,n=12){const mon=new Date();mon.setHours(0,0,0,0);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));const f={duration:w=>w.duration/3600,volume:vol,reps:w=>w.exercises.reduce((a,e)=>a+e.sets.filter(s=>s.done).reduce((b,s)=>b+(+s.reps||0),0),0)}[metric];
+ const out=[];for(let i=n-1;i>=0;i--){const s=new Date(mon);s.setDate(s.getDate()-7*i);const e=new Date(s);e.setDate(e.getDate()+7);out.push({label:s.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),v:db.workouts.filter(w=>w.start>=+s&&w.start<+e).reduce((a,w)=>a+f(w),0)})}return out}
+function chartCard(){const m=ui.metric||'duration';const weeks=weekly(m);const max=Math.max(...weeks.map(w=>w.v));
+ const unit={duration:'hours',volume:'kg',reps:'repetitions'}[m];const cur=weeks.at(-1).v;
+ const body=max?`<div class="chart-top"><b>${m==='duration'?cur.toFixed(1):Math.round(cur).toLocaleString('en-GB')} ${unit}</b> <small>this week</small></div><svg class="chart" viewBox="0 0 330 150">${weeks.map((w,i)=>{const h=Math.round(w.v/max*110);return `<rect x="${i*27.5+5}" y="${125-h}" width="17" height="${h}" rx="3" class="${i===11?'cur':''}"/>${i%3===0?`<text x="${i*27.5+13}" y="145">${w.label}</text>`:''}`}).join('')}<line x1="0" x2="330" y1="125.5" y2="125.5"/></svg>`:`<div class="nodata">${I.bars}<p>No data in time period</p></div>`;
+ return `<div class="range">Last 3 months ${I.down}</div><div class="chartcard">${body}</div>
+ <div class="pills">${[['duration','Duration'],['volume','Volume'],['reps','Reps']].map(([k,l])=>`<button class="pill ${m===k?'on':''}" data-a="metric" data-v="${k}">${l}</button>`).join('')}</div>`}
+function profileView(){const recs=db.workouts.reduce((a,w)=>a+(w.records?.length||0),0);
+ return bigHeader(esc(db.profileName),glassGroup([['page',I.pencil,'Edit profile','editProfile'],['exportData',I.upload,'Export backup'],['page',I.gear,'Settings','settings']]))+`<main class="scroll">
+ <div class="prof">${avatar('big')}<div class="prof-r"><b class="pname">${esc(db.profileName)}</b><div class="pstats"><div><small>Workouts</small><b>${db.workouts.length}</b></div><div><small>Records</small><b>${recs}</b></div><div><small>Routines</small><b>${db.routines.length}</b></div></div></div></div>
+ ${db.bio?`<p class="bio">${esc(db.bio)}</p>`:''}
+ ${chartCard()}
+ <p class="label">Dashboard</p>
+ <div class="two"><button class="btn grey left" data-a="page" data-v="statistics">${I.chart} Statistics</button><button class="btn grey left" data-a="page" data-v="exercises">${I.dumbbell} Exercises</button>
+ <button class="btn grey left" data-a="page" data-v="measures">${I.person} Measures</button><button class="btn grey left" data-a="page" data-v="calendar">${I.cal} Calendar</button></div>
+ <p class="label">Workouts</p></main>`.replace('</main>',`<div class="flush-in">${[...db.workouts].reverse().map(feedCard).join('<div class="sep"></div>')||'<p class="muted">No workouts yet.</p>'}</div></main>`)}
+// ---------- Sub-pages ----------
+const listRow=(a,v,ic,l,extra='')=>`<button class="lrow" data-a="${a}" ${v?`data-v="${v}"`:''}>${ic}<span>${l}</span>${extra}${I.chev}</button>`;
+function settingsPage(){return subHeader('Settings')+`<main class="scroll flush grouped">
+ <p class="ghead">Account</p><div class="glist">${listRow('page','editProfile',I.user,'Profile')}</div>
+ <p class="ghead">Preferences</p><div class="glist">${listRow('defaultRest','',I.timer,'Default rest timer',`<em>${clock(db.defaultRest??90)}</em>`)}${listRow('page','measures',I.scale,'Measurements')}</div>
+ <p class="ghead">Data</p><div class="glist">${listRow('exportData','',I.upload,'Export backup')}<label class="lrow">${I.download}<span>Import backup</span>${I.chev}<input type="file" id="importFile" accept="application/json,.json" hidden></label>${listRow('resetData','',I.trash,'Delete all data on this device')}</div>
+ <p class="ghead">About</p><div class="glist">${listRow('about','',I.info,'About Repforge')}</div>
+ <p class="foot">Your data is stored only on this device. Export a backup now and then, because iPhone can clear website data.</p></main>`}
+function exercisesPage(){const q=(ui.search||'').toLowerCase();const list=EXERCISES.filter(e=>(ui.muscle==='All'||e.muscle===ui.muscle)&&(ui.equip==='All'||e.equipment===ui.equip)&&e.name.toLowerCase().includes(q));
+ const picking=ui.view==='picker';
+ return (picking?subHeader('Add Exercise'):subHeader('Exercises'))+`<div class="pad16"><div class="searchbox">${I.search}<input id="search" placeholder="Search exercise" value="${esc(ui.search||'')}"></div>
+ <div class="two"><button class="btn grey sm2" data-a="cycleEquip">${ui.equip==='All'?'All Equipment':ui.equip}</button><button class="btn grey sm2" data-a="cycleMuscle">${ui.muscle==='All'?'All Muscles':ui.muscle}</button></div></div>
+ <main class="scroll flush"><p class="label pad16">${picking?'All Exercises':'Exercises'} (${list.length})</p>${list.map(e=>`<button class="exrow" data-a="${picking?'pick':'noop'}" data-v="${e.id}">${thumb(e)}<div><b>${esc(e.name)} (${e.equipment})</b><small>${e.muscle}</small></div>${I.chev}</button>`).join('')||'<p class="muted pad16">No exercises match your search.</p>'}</main>`}
+function measuresPage(){const m=[...(db.measures||[])].reverse();
+ return subHeader('Measures')+`<main class="scroll">
+ <div class="chartcard tight"><small class="muted">Latest bodyweight</small><b class="big">${m[0]?m[0].kg+' kg':'—'}</b></div>
+ <div class="addm"><input id="bw" inputmode="decimal" placeholder="Bodyweight in kilograms"><button class="btn primary sm2" data-a="addMeasure">Add</button></div>
+ <p class="label">History</p><div class="glist">${m.map((x,i)=>`<div class="lrow static"><span>${new Date(x.t).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</span><em>${x.kg} kg</em><button class="icon" data-a="delMeasure" data-v="${m.length-1-i}" aria-label="Delete">${I.trash}</button></div>`).join('')||'<p class="muted pad16">No measurements yet.</p>'}</div></main>`}
+function calendarPage(){const days=new Set(db.workouts.map(w=>new Date(w.start).toDateString()));const today=new Date();today.setHours(0,0,0,0);
+ // week streak: consecutive weeks (ending this or last week) with a workout
+ const wk=d=>{const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return +x};const weeks=new Set(db.workouts.map(w=>wk(w.start)));
+ let streak=0,c=wk(today);if(!weeks.has(c))c-=7*864e5;while(weeks.has(c)){streak++;c-=7*864e5}
+ const first=db.workouts.length?new Date(Math.min(...db.workouts.map(w=>w.start))):today;const f0=new Date(first);f0.setHours(0,0,0,0);
+ const rest=Math.round((today-f0)/864e5)+1-days.size;
+ const months=[];for(let i=2;i>=0;i--)months.push(new Date(today.getFullYear(),today.getMonth()-i,1));
+ const grid=m=>{const n=new Date(m.getFullYear(),m.getMonth()+1,0).getDate();const off=(m.getDay()+6)%7;let h='';for(let i=0;i<off;i++)h+='<span></span>';for(let d=1;d<=n;d++){const dt=new Date(m.getFullYear(),m.getMonth(),d);h+=`<span class="${days.has(dt.toDateString())?'wd':''} ${+dt===+today?'today':''}">${d}</span>`}return h};
+ return subHeader('Calendar')+`<div class="streak"><div>${I.flame} ${streak} week streak</div><div>${I.moon} ${Math.max(0,rest)} rest days</div></div>
+ <div class="dow">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<span>${d}</span>`).join('')}</div>
+ <main class="scroll flush">${months.map(m=>`<h3 class="mhead">${m.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</h3><div class="mgrid">${grid(m)}</div>`).join('')}</main>`}
+function editProfilePage(){return subHeader('Edit Profile',`<button class="glass pillbtn" data-a="saveProfile">Done</button>`)+`<main class="scroll">
+ <div class="center-av">${avatar('big')}<p class="blue">Your initial is used as your picture</p></div>
+ <p class="ghead">Public profile data</p><div class="glist form"><label class="lrow static"><span>Name</span><input id="pname" value="${esc(db.profileName)}"></label><label class="lrow static"><span>Bio</span><input id="pbio" placeholder="Describe yourself" value="${esc(db.bio||'')}"></label></div></main>`}
+function statisticsPage(){const since=Date.now()-7*864e5;const last=db.workouts.filter(w=>w.start>=since);const mus={};db.workouts.forEach(w=>w.exercises.forEach(e=>{const m=exById(e.exId).muscle;mus[m]=(mus[m]||0)+e.sets.filter(s=>s.done).length}));const tot=Object.values(mus).reduce((a,b)=>a+b,0)||1;
+ return subHeader('Statistics')+`<main class="scroll"><p class="label">Last 7 days</p><div class="two"><div class="tile"><small>Workouts</small><b>${last.length}</b></div><div class="tile"><small>Duration</small><b>${fmtDur(last.reduce((a,w)=>a+w.duration,0))}</b></div><div class="tile"><small>Volume</small><b>${last.reduce((a,w)=>a+vol(w),0).toLocaleString('en-GB')} kg</b></div><div class="tile"><small>Sets</small><b>${last.reduce((a,w)=>a+sets(w),0)}</b></div></div>
+ <p class="label">Set count by muscle (all time)</p>${Object.entries(mus).sort((a,b)=>b[1]-a[1]).map(([m,n])=>`<div class="mbar"><span>${m}</span><div><i style="width:${n/tot*100}%"></i></div><em>${n}</em></div>`).join('')||'<p class="muted">No data yet.</p>'}</main>`}
+const PAGES={settings:settingsPage,exercises:exercisesPage,measures:measuresPage,calendar:calendarPage,editProfile:editProfilePage,statistics:statisticsPage};
+
 // ---------- Active workout ----------
 function activeView(){
  const w=db.active;const el=(Date.now()-w.start)/1000;
- return `<div class="sheet"><header class="top bar"><button class="icon" data-a="minimise" aria-label="Minimise">${I.back}</button><h2>Log workout</h2><span class="spacer"></span><button class="btn primary sm" data-a="finish">Finish</button></header>
+ return `<div class="sheet"><header class="top bar"><button class="glass round" data-a="minimise" aria-label="Minimise">${I.down}</button><h2>Log Workout</h2><span class="spacer"></span><button class="btn primary sm" data-a="finish">Finish</button></header>
  <div class="wstats"><div><small>Duration</small><b class="blue" id="dur">${fmtDur(el)}</b></div><div><small>Volume</small><b id="wvol">${vol(w).toLocaleString('en-GB')} kg</b></div><div><small>Sets</small><b id="wsets">${sets(w)}</b></div></div>
  <main class="scroll pb">
  ${w.exercises.length?'':`<div class="empty">${I.dumbbell}<h2>Get started</h2><p>Add an exercise to start your workout.</p></div>`}
@@ -101,15 +159,8 @@ function exCard(e,ei){const x=exById(e.exId);const prev=previousFor(e.exId);cons
   <button class="tick" data-a="tick" data-v="${ei}-${si}" aria-label="Complete set">${I.check}</button>${isPr?'<span class="prdot" title="Personal record">'+I.trophy+'</span>':''}</div>`}).join('')}
  </div><button class="btn dark wide sm" data-a="addSet" data-v="${ei}">${I.plus} Add set</button></section>`}
 function restBar(){if(!ui.rest)return'';const left=(ui.rest.end-Date.now())/1000;const pct=Math.max(0,left/ui.rest.total*100);
- return `<div class="restbar"><div class="fill" style="width:${pct}%"></div><button class="btn dark sm" data-a="rest" data-v="-15">−15</button><b id="restclock">${clock(left)}</b><button class="btn dark sm" data-a="rest" data-v="15">+15</button><button class="btn primary sm" data-a="skipRest">Skip</button></div>`}
-// ---------- Picker ----------
-function pickerView(){const q=ui.search.toLowerCase();const muscles=['All',...new Set(EXERCISES.map(e=>e.muscle))];
- const list=EXERCISES.filter(e=>(ui.muscle==='All'||e.muscle===ui.muscle)&&(e.name.toLowerCase().includes(q)||e.equipment.toLowerCase().includes(q)));
- const groups={};list.forEach(e=>(groups[e.muscle]??=[]).push(e));
- return `<div class="sheet"><header class="top bar"><button class="link" data-a="closePicker">Cancel</button><h2>Add exercise</h2><span class="spacer"></span></header>
- <div class="searchbox">${I.search}<input id="search" placeholder="Search exercise" value="${esc(ui.search)}"></div>
- <div class="chips">${muscles.map(m=>`<button class="chip ${m===ui.muscle?'on':''}" data-a="muscle" data-v="${m}">${m==='All'?'All muscles':m}</button>`).join('')}</div>
- <main class="scroll" id="plist">${Object.entries(groups).map(([m,xs])=>`<p class="label">${m}</p>${xs.map(e=>`<button class="pick" data-a="pick" data-v="${e.id}">${thumb(e)}<div><b>${esc(e.name)}</b><small>${e.muscle} · ${e.equipment}</small></div></button>`).join('')}`).join('')||'<p class="muted pad">No exercises match your search.</p>'}</main></div>`}
+ return `<div class="restbar glass"><div class="fill" style="width:${pct}%"></div><button class="btn dark sm" data-a="rest" data-v="-15">−15</button><b id="restclock">${clock(left)}</b><button class="btn dark sm" data-a="rest" data-v="15">+15</button><button class="btn primary sm" data-a="skipRest">Skip</button></div>`}
+function pickerView(){return exercisesPage()}
 // ---------- Routine editor ----------
 function routineView(){const r=ui.routineDraft;
  return `<div class="sheet"><header class="top bar"><button class="link" data-a="cancelRoutine">Cancel</button><h2>${r.isNew?'Create routine':'Edit routine'}</h2><span class="spacer"></span><button class="btn primary sm" data-a="saveRoutine">Save</button></header>
@@ -130,22 +181,34 @@ function summaryView(){const w=ui.summary;
 function render(){
  const v=ui.view;let body;
  if(v==='active')body=activeView();else if(v==='picker')body=pickerView();else if(v==='routine')body=routineView();else if(v==='summary')body=summaryView();else if(v==='share')body=shareView();
- else body=(ui.tab==='home'?homeView():ui.tab==='workout'?workoutTabView():profileView())+
-  (db.active?`<div class="mini" data-a="openActive"><span>Workout in progress</span><b class="blue">${fmtDur((Date.now()-db.active.start)/1000)}</b></div>`:'')+
-  `<nav class="tabs">${[['home','Home',I.home],['workout','Workout',I.dumbbell],['profile','Profile',I.user]].map(([k,l,ic])=>`<button class="${ui.tab===k?'on':''}" data-a="tab" data-v="${k}">${ic}<span>${l}</span></button>`).join('')}</nav>`;
+ else{const pg=ui.pages.at(-1);body=(pg?PAGES[pg]():ui.tab==='home'?homeView():ui.tab==='workout'?workoutTabView():profileView())+
+  (db.active?`<div class="mini glass" data-a="openActive">${I.clock}<span>Workout in progress</span><b class="blue">${fmtDur((Date.now()-db.active.start)/1000)}</b></div>`:'')+
+  `<nav class="tabs glass">${[['home','Home',I.home],['workout','Workout',I.dumbbell],['profile','Profile',I.user]].map(([k,l,ic])=>`<button class="${ui.tab===k?'on':''}" data-a="tab" data-v="${k}">${ic}<span>${l}</span></button>`).join('')}</nav>`}
  $('#app').innerHTML=body;
  if(v==='share')paint();
 }
 function newWorkout(name,exercises=[]){db.active={name,start:Date.now(),exercises};save();ui.view='active';render()}
 const A={
- tab:v=>{ui.tab=v;ui.view=null},
+ tab:v=>{ui.tab=v;ui.view=null;ui.pages=[]},
+ page:v=>{ui.pages.push(v);ui.search='';ui.muscle='All';ui.equip='All'},
+ back:()=>{if(ui.view==='picker')return A.closePicker();ui.pages.pop()},
+ metric:v=>{ui.metric=v},noop:()=>{},
+ cycleMuscle:()=>{const m=['All',...new Set(EXERCISES.map(e=>e.muscle))];ui.muscle=m[(m.indexOf(ui.muscle)+1)%m.length]},
+ cycleEquip:()=>{const m=['All',...new Set(EXERCISES.map(e=>e.equipment))];ui.equip=m[(m.indexOf(ui.equip)+1)%m.length]},
+ like:id=>{const w=db.workouts.find(x=>x.id===id);w.liked=!w.liked;save()},
+ comment:id=>{const w=db.workouts.find(x=>x.id===id);const c=prompt('Add a comment to this workout',w.comment||'');if(c!==null){w.comment=c;save()}},
+ defaultRest:()=>{const o=[0,30,60,90,120,180];db.defaultRest=o[(o.indexOf(db.defaultRest??90)+1)%o.length];save()},
+ about:()=>alert('Repforge, version 1. Your own workout tracker. All data stays on this device.'),
+ addMeasure:()=>{const v=parseFloat($('#bw').value.replace(',','.'));if(!(v>0))return alert('Enter your bodyweight in kilograms.');(db.measures??=[]).push({t:Date.now(),kg:v});save()},
+ delMeasure:i=>{db.measures.splice(+i,1);save()},
+ saveProfile:()=>{db.profileName=$('#pname').value.trim()||'Athlete';db.bio=$('#pbio').value.trim();save();ui.pages.pop()},
  startEmpty:()=>newWorkout(timeName()),
  startRoutine:id=>{const r=db.routines.find(x=>x.id===id);newWorkout(r.name,r.exercises.map(e=>({exId:e.exId,rest:90,sets:Array.from({length:e.sets},()=>({kg:'',reps:'',done:false}))})))},
  openActive:()=>{ui.view='active'},minimise:()=>{ui.view=null},
- addEx:()=>{ui.picker='workout';ui.view='picker';ui.search='';ui.muscle='All'},
+ addEx:()=>{ui.picker='workout';ui.view='picker';ui.search='';ui.muscle='All';ui.equip='All'},
  closePicker:()=>{ui.view=ui.picker==='workout'?'active':'routine'},
  muscle:v=>{ui.muscle=v},
- pick:id=>{if(ui.picker==='workout'){db.active.exercises.push({exId:id,rest:90,sets:[{kg:'',reps:'',done:false}]});save();ui.view='active'}else{ui.routineDraft.exercises.push({exId:id,sets:3});ui.view='routine'}},
+ pick:id=>{if(ui.picker==='workout'){db.active.exercises.push({exId:id,rest:db.defaultRest??90,sets:[{kg:'',reps:'',done:false}]});save();ui.view='active'}else{ui.routineDraft.exercises.push({exId:id,sets:3});ui.view='routine'}},
  addSet:i=>{const e=db.active.exercises[i];const l=e.sets.at(-1);e.sets.push({kg:l?.kg||'',reps:l?.reps||'',done:false});save()},
  removeEx:i=>{if(confirm('Remove this exercise from the workout?')){db.active.exercises.splice(+i,1);save()}},
  restChange:i=>{const e=db.active.exercises[i];const opts=[0,30,60,90,120,180];e.rest=opts[(opts.indexOf(e.rest??90)+1)%opts.length];save()},
@@ -161,14 +224,14 @@ const A={
   w.records=w.exercises.filter(e=>{const b=bestWeight(e.exId);return b>0&&Math.max(...e.sets.map(s=>+s.kg||0))>b}).map(e=>e.exId);
   db.workouts.push(w);db.active=null;ui.rest=null;save();ui.summary=w;ui.view='summary'},
  exportData:()=>{const b=new Blob([JSON.stringify({app:'repforge',version:1,exported:new Date().toISOString(),data:db},null,2)],{type:'application/json'});download(b,`repforge-backup-${new Date().toISOString().slice(0,10)}.json`)},
- doneSummary:()=>{ui.view=null;ui.tab='home'},
+ doneSummary:()=>{ui.view=null;ui.tab='home';ui.pages=[]},
  newRoutine:()=>{ui.routineDraft={id:'r'+Date.now(),name:'',exercises:[],isNew:true};ui.view='routine'},
  editRoutine:id=>{ui.routineDraft={...structuredClone(db.routines.find(r=>r.id===id)),isNew:false};ui.view='routine'},
  cancelRoutine:()=>{ui.view=null},
- rAdd:()=>{ui.routineDraft.name=$('#rname').value;ui.picker='routine';ui.view='picker';ui.search='';ui.muscle='All'},
+ rAdd:()=>{ui.routineDraft.name=$('#rname').value;ui.picker='routine';ui.view='picker';ui.search='';ui.muscle='All';ui.equip='All'},
  rRemove:i=>{ui.routineDraft.exercises.splice(+i,1)},
  rSets:v=>{const[i,d]=v.split('|').map(Number);const e=ui.routineDraft.exercises[i];e.sets=Math.max(1,e.sets+d)},
- saveRoutine:()=>{const r=ui.routineDraft;r.name=$('#rname').value.trim()||'Untitled routine';const{isNew,...clean}=r;const i=db.routines.findIndex(x=>x.id===r.id);if(i>=0)db.routines[i]=clean;else db.routines.push(clean);save();ui.view=null;ui.tab='workout'},
+ saveRoutine:()=>{const r=ui.routineDraft;r.name=$('#rname').value.trim()||'Untitled routine';const{isNew,...clean}=r;const i=db.routines.findIndex(x=>x.id===r.id);if(i>=0)db.routines[i]=clean;else db.routines.push(clean);save();ui.view=null;ui.tab='workout';ui.pages=[]},
  rDelete:()=>{if(confirm('Delete this routine?')){db.routines=db.routines.filter(x=>x.id!==ui.routineDraft.id);save();ui.view=null}},
  resetData:()=>{if(confirm('Delete every workout and routine on this device?')){localStorage.removeItem(KEY);location.reload()}},
 };

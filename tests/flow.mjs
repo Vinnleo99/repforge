@@ -6,15 +6,15 @@ const p=await ctx.newPage();p.on('dialog',d=>d.accept());const errs=[];p.on('pag
 const shot=n=>p.screenshot({path:`screenshots/${n}.png`});
 try{
 await p.goto('http://localhost:4173/');
-async function workout(kg,ss){await p.click('nav >> text=Workout');await p.click('text=Start an empty workout');
- await p.click('text=Add exercise');await p.fill('#search','bench');await p.click('.pick >> text=Bench Press');
+async function workout(kg,ss){await p.click('nav >> text=Workout');await p.click('text=Start Empty Workout');
+ await p.click('text=Add exercise');await p.fill('#search','bench');await p.click('.exrow >> text=Bench Press');
  for(let i=0;i<ss;i++){if(i)await p.click('text=Add set');await p.fill(`[data-f=kg][data-i="0-${i}"]`,String(kg));await p.fill(`[data-f=reps][data-i="0-${i}"]`,'8');await p.click(`.tick[data-v="0-${i}"]`)}}
 await shot('01-home-empty');
 await workout(60,2);await p.click('text=Finish');await p.click('[data-a=doneSummary]');
 await p.click('nav >> text=Workout');await p.click('text=New routine');await p.fill('#rname','Push day');await p.click('text=Add exercise');
-await p.click('.pick >> text=Overhead Press');await p.click('text=Add exercise');await p.click('.pick >> text=Lateral Raise');await shot('06-routine-editor');await p.click('text=Save');
+await p.click('.exrow >> text=Overhead Press');await p.click('text=Add exercise');await p.click('.exrow >> text=Lateral Raise');await shot('06-routine-editor');await p.click('text=Save');
 await shot('02-workout-tab');
-await workout(70,3);await p.click('text=Add exercise');await shot('04-exercise-picker');await p.fill('#search','goblet');await p.click('.pick >> text=Goblet Squat');
+await workout(70,3);await p.click('text=Add exercise');await shot('04-exercise-picker');await p.fill('#search','goblet');await p.click('.exrow >> text=Goblet Squat');
 await p.fill('[data-f=kg][data-i="1-0"]','24');await p.fill('[data-f=reps][data-i="1-0"]','12');await p.click('.tick[data-v="1-0"]');
 assert(await p.isVisible('.restbar'),'rest timer should be visible');await shot('03-active-workout');
 await p.click('text=Finish');assert(await p.isVisible('text=Well done!'));assert(await p.isVisible('text=Personal records'),'PR expected');await shot('05-finish-summary');
@@ -25,9 +25,11 @@ await p.click('text=Centre card');await p.waitForTimeout(200);await shot('09-sha
 await p.click('text=Transparent sticker');await p.waitForTimeout(200);await shot('10-share-sticker');
 const dl=p.waitForEvent('download');await p.click('text=Save to device');const d=await dl;assert(d.suggestedFilename().endsWith('.png'));
 await p.click('text=Close');await p.click('[data-a=doneSummary]');
-assert.equal(await p.locator('.post').count(),2,'two workouts in history');assert(await p.isVisible('.post >> text=Personal record'));await shot('00-home-history');
+assert.equal(await p.locator('.post').count(),2,'two workouts in history');assert(await p.isVisible('.post .medal, .post >> text=record'));await shot('00-home-history');
 await p.click('nav >> text=Profile');await shot('07-profile');
-const dl2=p.waitForEvent('download');await p.click('text=Export backup');const bk=await dl2;
+for(const [pg,n] of [['exercises','11-exercises'],['settings','12-settings'],['calendar','13-calendar'],['measures','14-measures'],['statistics','15-statistics'],['editProfile','16-edit-profile']]){await p.click(`[data-a=page][data-v=${pg}]`);if(pg==='measures'){await p.fill('#bw','78.5');await p.click('text=Add')}await shot(n);await p.click('[data-a=back]')}
+await p.click('[data-a=metric][data-v=volume]');await p.evaluate(()=>document.querySelector('.scroll').scrollTop=0);await shot('07-profile');
+const dl2=p.waitForEvent('download');await p.click('header [data-a=exportData]');const bk=await dl2;
 assert.equal(JSON.parse(fs.readFileSync(await bk.path(),'utf8')).data.workouts.length,2);
 const vres=await p.evaluate(async()=>{const c=document.createElement('canvas');c.width=320;c.height=240;const g=c.getContext('2d');const r=new MediaRecorder(c.captureStream(30),{mimeType:'video/webm'});const ch=[];r.ondataavailable=e=>ch.push(e.data);r.start();for(let i=0;i<45;i++){g.fillStyle=`hsl(${i*8},60%,40%)`;g.fillRect(0,0,320,240);await new Promise(q=>setTimeout(q,33))}r.stop();await new Promise(q=>r.onstop=q);return new Blob(ch).size});
 assert(vres>0);console.log('All checks passed. Video smoke bytes:',vres,'Page errors:',errs);
