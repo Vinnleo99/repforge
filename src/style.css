@@ -1,6 +1,6 @@
 /* Repforge light theme, iOS Liquid Glass style. Measurements taken from 390-point reference screenshots. */
 :root{--bg:#fff;--card:#fff;--row-alt:#f7f8fa;--done:#e3f6e8;--bar:#c9dcfb;--icon:#5d6470;--sheet:#f2f2f7;--grey:#f2f4f7;--line:#e4e6e9;--text:#01091c;--muted:#84888e;--blue:#3d8af7;--green:#34c759;--gold:#f5b82e;--red:#ff3b30;
- --glass:rgba(255,255,255,.88);--glass-b:rgba(255,255,255,.75);--glass-sh:0 8px 28px rgba(0,0,0,.10),0 1px 2px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(0,0,0,.04)}
+ --glass:rgba(255,255,255,.72);--glass-b:rgba(255,255,255,.75);--glass-sh:0 8px 28px rgba(0,0,0,.10),0 1px 2px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(0,0,0,.04)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",system-ui,sans-serif;height:100%;-webkit-font-smoothing:antialiased}
 #app{max-width:520px;margin:0 auto;height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
@@ -148,7 +148,7 @@ b.big{display:block;font-size:28px;font-weight:600}
 @media (prefers-color-scheme:dark){
  :root{--bg:#000;--card:#1c1c1e;--grey:#2c2c2e;--line:#38383a;--text:#fff;--muted:#98989f;--blue:#0a84ff;--green:#30d158;--red:#ff453a;--gold:#ffd60a;
   --row-alt:#1c1c1e;--done:#16341f;--bar:#1f3b63;--icon:#c7c7cc;--sheet:#2c2c2e;
-  --glass:rgba(30,30,32,.88);--glass-b:rgba(255,255,255,.12);--glass-sh:0 8px 28px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);color-scheme:dark}
+  --glass:rgba(30,30,32,.72);--glass-b:rgba(255,255,255,.12);--glass-sh:0 8px 28px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);color-scheme:dark}
  .tabs .on{background:rgba(120,120,128,.32)}
  .dlg-scrim{background:rgba(0,0,0,.6)}
 }
