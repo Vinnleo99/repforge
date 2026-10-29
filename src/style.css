@@ -1,6 +1,6 @@
 /* Repforge light theme, iOS Liquid Glass style. Measurements taken from 390-point reference screenshots. */
 :root{--bg:#fff;--grey:#f2f4f7;--line:#e4e6e9;--text:#01091c;--muted:#84888e;--blue:#3d8af7;--green:#34c759;--gold:#f5b82e;--red:#ff3b30;
- --glass:#ffffff;--glass-b:#e4e6e9;--glass-sh:0 4px 16px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06)}
+ --glass:rgba(255,255,255,.62);--glass-b:rgba(255,255,255,.75);--glass-sh:0 8px 28px rgba(0,0,0,.10),0 1px 2px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(0,0,0,.04)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",system-ui,sans-serif;height:100%;-webkit-font-smoothing:antialiased}
 #app{max-width:520px;margin:0 auto;height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
@@ -8,7 +8,7 @@ svg{width:22px;height:22px;flex:none}svg.o{fill:none;stroke:currentColor;stroke-
 button{font-family:inherit;color:inherit}
 .spacer{flex:1}.muted{color:var(--muted)}.blue{color:var(--blue)}.small{font-size:12px}.pad16{padding:0 16px}
 /* glass */
-.glass{background:#fff;border:1px solid var(--glass-b);box-shadow:var(--glass-sh)}
+.glass{background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);border:.5px solid var(--glass-b);box-shadow:var(--glass-sh)}
 /* headers */
 .hdr{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 8px) 16px 8px;min-height:62px;background:var(--bg);position:relative;z-index:2}
 .hdr h1{font-size:23px;font-weight:700;margin:0;flex:1;letter-spacing:-.3px}
@@ -34,7 +34,7 @@ button{font-family:inherit;color:inherit}
 /* tab bar */
 .tabs{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));width:274px;height:62px;border-radius:31px;display:flex;padding:4px;z-index:5}
 .tabs button{flex:1;background:none;border:0;border-radius:27px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:600;color:var(--text)}
-.tabs button svg{width:26px;height:26px}.tabs .on{background:#eceef1;color:var(--blue)}
+.tabs button svg{width:26px;height:26px}.tabs .on{background:rgba(120,120,128,.16);color:var(--blue)}
 .mini{position:absolute;left:16px;right:16px;bottom:calc(86px + env(safe-area-inset-bottom));border-radius:22px;height:44px;display:flex;align-items:center;gap:8px;padding:0 16px;z-index:4;font-size:15px}.mini span{flex:1}
 /* routines */
 .routine{border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;margin-bottom:14px}
