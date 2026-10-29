@@ -58,3 +58,29 @@ svg{width:20px;height:20px;fill:currentColor;flex:none}
 .center{text-align:center}.center .card{text-align:left}.center .stats{margin:10px 0}.confetti svg{width:64px;height:64px;color:var(--gold);margin-top:30px}
 .canvas-wrap{border-radius:12px;overflow:hidden;background:#000;margin-bottom:10px}.canvas-wrap canvas{width:100%;display:block}
 .checker{background:repeating-conic-gradient(#333 0 25%,#222 0 50%) 0 0/24px 24px}
+
+/* ---- Compact sizing modelled on Hevy at 390 pixels wide ---- */
+.btn{position:relative;min-height:40px;padding:0 14px;border-radius:8px;font-size:15px;font-weight:600;gap:5px}
+.btn svg{width:17px;height:17px}
+.btn.wide{margin:5px 0}
+.btn.primary.wide{min-height:42px}
+.btn.sm{min-height:32px;padding:0 12px;font-size:14px;border-radius:7px}
+.btn.sm::after,.chip::after,.icon::after,.link::after{content:'';position:absolute;inset:-6px -2px} /* keeps the touch target at least 44 points */
+.top .btn.primary.sm{min-height:30px;padding:0 13px;font-size:14px;border-radius:6px}
+.ex .btn.dark.wide.sm{min-height:34px;color:#c7c7cc;font-size:14px;margin-top:8px}
+.btn.dark{background:var(--card2)}
+.two{gap:8px;margin:5px 0}.two .btn{min-height:38px;font-size:14px}
+.icon{position:relative;padding:4px;color:var(--muted)}.icon svg{width:20px;height:20px}
+.link{position:relative;font-size:15px}
+.chip{position:relative;padding:5px 12px;font-size:13px;border-radius:16px}
+.top{padding:calc(env(safe-area-inset-top) + 10px) 14px 8px}
+.tick{height:44px;width:40px;background:none;padding:0;color:var(--muted);display:grid;place-items:center;margin:-8px 0}
+.tick svg{width:28px;height:28px;padding:5px;border-radius:7px;background:var(--card2)}
+.done .tick{background:none}.done .tick svg{background:var(--green);color:#fff}
+.sr{padding:6px 4px;grid-template-columns:34px 1fr 60px 52px 40px}
+.sr input{padding:4px 2px;height:28px;font-size:15px}
+.tabs button{padding:6px 0 7px;font-size:10.5px;gap:1px}.tabs button svg{width:22px;height:22px}
+.mini{bottom:56px}
+.restbar{padding:8px 14px calc(8px + env(safe-area-inset-bottom));gap:8px}.restbar b{font-size:20px}
+.pick{padding:8px 0}
+.rest-line{font-size:13px}
