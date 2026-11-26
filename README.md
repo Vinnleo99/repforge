@@ -1,6 +1,6 @@
 # Repforge
 
-A workout tracker that runs as an installable web app. All data stays on the device (localStorage). Use Profile → Export backup regularly.
+A workout tracker that runs as an installable web app. All workout data stays on the device (localStorage). Use Profile → Export backup regularly. The daily gym schedule is a public file, `schedule.json`; see SCHEDULE.md if you need to edit it.
 
 - Install: `npm install`
 - Develop: `npm run dev`

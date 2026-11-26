@@ -11,6 +11,24 @@ async function workout(kg,ss){await p.click('nav >> text=Workout');await p.click
  await p.click('text=Add exercise');await p.fill('#search','bench');await p.click('.exrow >> text=Bench Press');
  for(let i=0;i<ss;i++){if(i)await p.click('text=Add set');await p.fill(`[data-f=kg][data-i="0-${i}"]`,String(kg));await p.fill(`[data-f=reps][data-i="0-${i}"]`,'8');await p.click(`.tick[data-v="0-${i}"]`)}}
 await shot('01-home-empty');
+await p.click('nav >> text=Workout');
+await p.waitForSelector('.today',{timeout:10000});
+assert(await p.isVisible('text=Today is a gym day')||await p.isVisible('text=Today is a rest day'),'today card heading');
+assert(await p.locator('.today-ex li').count()>0,'today exercise list');
+assert(await p.isVisible('text=Start this workout'));
+await p.click('.segment >> text=Home');
+assert(await p.isVisible('text=Equipment at home'),'home equipment note');
+const homeFirst=await p.locator('.today-ex li b').first().textContent();
+await p.click('.segment >> text=Gym');
+const gymFirst=await p.locator('.today-ex li b').first().textContent();
+assert.notEqual(homeFirst,gymFirst,'home and gym lists should differ');
+await shot('25-today-card');
+if(!WK&&(process.env.SCHEME||'light')==='light')await p.screenshot({path:'screenshots/today-card.png'});
+await p.click('text=Start this workout');
+assert(await p.isVisible('text=Log Workout'));
+assert(await p.locator('section.ex').count()>=4,'pre-filled exercises');
+await p.click('[data-a=discard]');await p.waitForSelector('.asheet');await p.click('#dlg >> text=Discard Workout');
+assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('repforge-data-v1')).active),null);
 await workout(60,2);await p.click('text=Finish');await p.click('[data-a=doneSummary]');
 await p.click('nav >> text=Workout');await p.click('text=New routine');await p.fill('#rname','Push day');await p.click('text=Add exercise');
 await p.click('.exrow >> text=Overhead Press');await p.click('text=Add exercise');await p.click('.exrow >> text=Lateral Raise');await shot('06-routine-editor');await p.click('text=Save');

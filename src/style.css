@@ -144,6 +144,24 @@ b.big{display:block;font-size:28px;font-weight:600}
 .asheet .acts button{display:block;width:100%;height:57px;border:0;background:none;font-size:20px;color:var(--blue)}.asheet .acts button+button{border-top:1px solid var(--line)}
 .asheet .cancel{height:57px;border:0;font-size:20px;font-weight:600;color:var(--blue)}
 @keyframes pop{from{opacity:0;transform:translate(-50%,-50%) scale(1.1)}}@keyframes up{from{transform:translateY(100%)}}
+
+/* Today schedule card */
+.today{border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;margin:6px 0 16px}
+.today-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.today-date{color:var(--muted);font-size:13px;margin:0 0 2px}
+.today-top h3{margin:0;font-size:17px;font-weight:600}
+.today-session{margin:0 0 4px;font-size:17px;font-weight:600}
+.today-week,.today-status,.today-extras,.today-equip{color:var(--muted);font-size:14px;margin:0 0 8px}
+.today .label{margin:10px 0 6px}
+.today-ex{list-style:none;margin:4px 0 14px;padding:0}
+.today-ex li{padding:8px 0;border-bottom:1px solid var(--line)}
+.today-ex li:last-child{border-bottom:0}
+.today-ex b{font-weight:600;display:block;font-size:15px}
+.today-ex small{color:var(--muted);display:block;margin-top:2px;font-size:13px}
+.today .btn.primary{margin:0}
+.segment{display:flex;background:var(--grey);border-radius:9px;padding:2px;flex:none;min-width:132px}
+.segment button{flex:1;border:0;background:transparent;border-radius:7px;height:28px;font:600 13px/28px inherit;font-family:inherit;color:var(--text);padding:0 10px;cursor:pointer}
+.segment button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.16)}
 /* Dark mode: iOS system colours */
 @media (prefers-color-scheme:dark){
  :root{--bg:#000;--card:#1c1c1e;--grey:#2c2c2e;--line:#38383a;--text:#fff;--muted:#98989f;--blue:#0a84ff;--green:#30d158;--red:#ff453a;--gold:#ffd60a;
@@ -151,4 +169,5 @@ b.big{display:block;font-size:28px;font-weight:600}
   --glass:rgba(30,30,32,.80);--glass-f:blur(8px) saturate(130%) brightness(.9);--glass-b:rgba(255,255,255,.14);--glass-sh:0 8px 28px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);color-scheme:dark}
  .tabs .on{background:rgba(120,120,128,.32)}
  .dlg-scrim{background:rgba(0,0,0,.6)}
+ .segment button.on{box-shadow:0 1px 3px rgba(0,0,0,.5),inset 0 0 0 .5px rgba(255,255,255,.08)}
 }
