@@ -53,15 +53,10 @@ export function computedUpcoming(schedule) {
   return sessionAfter(schedule.rotation, last.session);
 }
 
-export function isGymDay(schedule, date = new Date()) {
+export function isRestDay(schedule, date = new Date()) {
   const iso = isoDate(date);
   const override = (schedule.overrides || {})[iso];
-  if (override && override.rest === true) return false;
-  if (override && override.rest === false) return true;
-  if (override && override.session) return true;
-  const days = schedule.gymDays;
-  if (!days || days.length === 0) return true;
-  return days.includes(weekdayName(date));
+  return !!(override && override.rest === true);
 }
 
 export function weekStartMonday(date = new Date()) {
@@ -81,9 +76,21 @@ export function weeklyDoneCount(schedule, date = new Date()) {
 }
 
 export function weeklyTarget(schedule) {
-  const days = schedule.gymDays;
-  if (Array.isArray(days) && days.length) return days.length;
-  return 4;
+  const t = schedule && schedule.weeklyTarget;
+  const min = Number(t && t.min);
+  const max = Number(t && t.max);
+  return {
+    min: Number.isFinite(min) && min > 0 ? min : 4,
+    max: Number.isFinite(max) && max > 0 ? max : 5,
+  };
+}
+
+export function formatWeeklyTarget(target) {
+  const t = target && typeof target === 'object' && 'min' in target ? target : weeklyTarget({});
+  const a = t.min;
+  const b = t.max;
+  if (a === b) return String(a);
+  return `${Math.min(a, b)} to ${Math.max(a, b)}`;
 }
 
 export function exercisesForSession(schedule, sessionName, location = 'gym') {
@@ -136,39 +143,39 @@ export function computeToday(schedule, date = new Date()) {
   const weekday = weekdayName(when);
   const override = (schedule.overrides || {})[iso] || null;
   const logEntry = todaysLog(schedule, iso);
-  const gymDay = isGymDay(schedule, when);
+  const restDay = isRestDay(schedule, when);
   const upcoming = computedUpcoming(schedule);
 
   let todaySession = null;
   let status = null;
-  if (override && override.session) {
+  if (restDay) {
+    todaySession = logEntry ? logEntry.session : null;
+    status = logEntry ? logEntry.status : null;
+  } else if (override && override.session) {
     todaySession = override.session;
     status = logEntry ? logEntry.status : null;
   } else if (logEntry) {
     todaySession = logEntry.session;
     status = logEntry.status;
-  } else if (gymDay) {
+  } else {
     todaySession = upcoming;
   }
 
-  const completedOrRest = status === 'done' || !gymDay;
   let nextSession = upcoming;
   if (status === 'done') {
-    if (schedule.next && schedule.next !== todaySession) nextSession = schedule.next;
-    else if (schedule.next && schedule.next === todaySession) nextSession = schedule.next;
+    if (schedule.next) nextSession = schedule.next;
     else nextSession = sessionAfter(schedule.rotation, todaySession);
   } else if (status === 'skipped') {
     nextSession = upcoming;
   }
 
-  const startSession = completedOrRest ? nextSession : todaySession;
+  const startSession = (status === 'done' || restDay) ? nextSession : todaySession;
 
   return {
     date: iso,
     weekday,
     displayDate: longDate(when),
-    isGymDay: gymDay,
-    isRestDay: !gymDay,
+    isRestDay: restDay,
     todaySession,
     status,
     logEntry,

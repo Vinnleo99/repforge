@@ -11,12 +11,12 @@ Do not put Victricius's private training notes anywhere except this file and the
 | `version` | Number. Raise it when you change the meaning of a field. |
 | `updated` | The date you last edited the file, as `YYYY-MM-DD`. |
 | `rotation` | The five sessions in order: Push A, Pull A, Legs, Push B, Pull B. |
-| `gymDays` | Weekday names such as `"Monday"`. An empty list or `null` means the days are not set, so the app treats every day as a possible gym day unless you override it. |
+| `weeklyTarget` | How many sessions he aims to complete in a week (Monday to Sunday), as `{ "min": 4, "max": 5 }`. If this field is missing, the app uses 4 to 5. |
 | `homeEquipment` | A short note shown when the Home list is selected. |
 | `sessions` | The gym exercise list for each session name. |
 | `homeSessions` | The home exercise list for the same five session names. |
 | `log` | A list of completed or skipped sessions, oldest first. Append a new row; do not rewrite history unless you are correcting a mistake. |
-| `overrides` | A map of `YYYY-MM-DD` to a one-day change (swap the session, force a rest day, or add a note). |
+| `overrides` | A map of `YYYY-MM-DD` to a one-day change (swap the session, mark a rest day with `"rest": true`, or add a note). There are no fixed gym weekdays; every day is a training day unless you set `rest` to `true`. |
 | `next` | Optional. If set to a session name, that session is the next one to do, instead of the session after the last completed log entry. Set it back to `null` once that session has been logged as done, or the same session will be offered again. |
 
 Each exercise is an object:
@@ -37,11 +37,13 @@ Each log entry is an object:
 
 ## How the app decides what today is
 
-1. If `overrides` has an entry for today and `rest` is `true`, today is a rest day.
-2. If that override has `rest` set to `false`, or names a `session`, today is a gym day and the named session is used.
-3. Otherwise, if `gymDays` is empty or missing, today is treated as a gym day. If `gymDays` lists weekdays, today is a gym day only when today's weekday is in that list.
-4. Today's session is, in this order: the override's `session` if present; otherwise the log entry for today if one exists; otherwise the `next` field if it is set; otherwise the session after the most recent log entry whose status is `"done"`. Skipped entries are ignored when advancing the rotation.
-5. When today is already completed, or is a rest day, the card also shows **Next up**: the session that should be done next, using the same rule.
+There are no fixed training weekdays. Every day shows the next session in the rotation as **Today's workout**, unless you mark that date as a rest day.
+
+1. If `overrides` has an entry for today and `rest` is `true`, today is a rest day. The card then shows **Next up** instead of today's workout.
+2. Otherwise today's session is, in this order: the override's `session` if present; otherwise the log entry for today if one exists; otherwise the `next` field if it is set; otherwise the session after the most recent log entry whose status is `"done"`. Skipped entries are ignored when advancing the rotation.
+3. When today is already completed, or is a rest day, the card also shows **Next up**: the session that should be done next, using the same rule.
+
+The weekly line on the card counts completed sessions from Monday to Sunday, and reads them against `weeklyTarget` (for example, "1 of 4 to 5 sessions completed this week").
 
 The Gym / Home toggle only changes which exercise list is shown and which exercises are copied into a started workout. It does not change which session name is due.
 
@@ -57,7 +59,7 @@ To give Victricius Legs today (for example 27 November 2026) instead of the comp
 }
 ```
 
-### Force a rest day, or force a gym day
+### Mark a rest day
 
 ```json
 "overrides": {
@@ -65,13 +67,7 @@ To give Victricius Legs today (for example 27 November 2026) instead of the comp
 }
 ```
 
-```json
-"overrides": {
-  "2026-11-29": { "rest": false, "session": "Pull A" }
-}
-```
-
-The second form is useful when `gymDays` is set and you want him to train on a day that is not in the list.
+Only an explicit `"rest": true` override makes a rest day. There is no weekday list to maintain.
 
 ### Restart the rotation
 
@@ -126,15 +122,13 @@ Edit the object inside `sessions` (gym) or `homeSessions` (home). Keep the sessi
 {"name": "Chest press machine", "sets": 3, "reps": "5-7", "note": "Heavier top set"}
 ```
 
-### Set the usual gym days
-
-Once the four weekdays are confirmed:
+### Change the weekly target
 
 ```json
-"gymDays": ["Monday", "Tuesday", "Thursday", "Friday"]
+"weeklyTarget": { "min": 4, "max": 5 }
 ```
 
-Use full English weekday names, with a capital letter.
+If the minimum and the maximum are the same number, the card will say "4 sessions" rather than "4 to 5 sessions".
 
 ## After you commit
 

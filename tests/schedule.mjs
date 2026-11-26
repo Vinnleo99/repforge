@@ -1,9 +1,9 @@
 import assert from 'assert';
 import { readFileSync } from 'fs';
 import {
-  isoDate, weekdayName, computeToday, computedUpcoming, isGymDay,
-  lastDone, sessionAfter, weeklyDoneCount, formatSetsReps, exerciseDetail,
-  exercisesForSession, matchExercise,
+  isoDate, weekdayName, computeToday, computedUpcoming, isRestDay,
+  lastDone, sessionAfter, weeklyDoneCount, weeklyTarget, formatWeeklyTarget,
+  formatSetsReps, exerciseDetail, exercisesForSession, matchExercise,
 } from '../src/schedule.js';
 import { EXERCISES } from '../src/exercises.js';
 
@@ -17,6 +17,7 @@ const tue = new Date(2026, 11, 1);
 assert.equal(isoDate(thu), '2026-11-26');
 assert.equal(weekdayName(thu), 'Thursday');
 assert.equal(file.rotation.length, 5);
+assert.ok(!('gymDays' in file));
 assert.equal(lastDone(file).session, 'Push A');
 assert.equal(computedUpcoming(file), 'Pull A');
 assert.equal(sessionAfter(file.rotation, 'Pull B'), 'Push A');
@@ -24,14 +25,14 @@ assert.equal(sessionAfter(file.rotation, 'Pull B'), 'Push A');
 // 1. Today is the day Push A was completed: show it as done, next up is Pull A.
 const todayDone = computeToday(file, thu);
 assert.equal(todayDone.date, '2026-11-26');
-assert.equal(todayDone.isGymDay, true);
 assert.equal(todayDone.isRestDay, false);
 assert.equal(todayDone.todaySession, 'Push A');
 assert.equal(todayDone.status, 'done');
 assert.equal(todayDone.nextSession, 'Pull A');
 assert.equal(todayDone.startSession, 'Pull A');
 assert.equal(todayDone.weeklyDone, 1);
-assert.equal(todayDone.weeklyTarget, 4);
+assert.deepEqual(todayDone.weeklyTarget, { min: 4, max: 5 });
+assert.equal(formatWeeklyTarget(todayDone.weeklyTarget), '4 to 5');
 assert.ok(exercisesForSession(file, 'Pull A', 'gym').some(e => e.name === 'Shoulder-width lat pulldown'));
 assert.ok(exercisesForSession(file, 'Pull A', 'home').some(e => /pull-ups/i.test(e.name)));
 
@@ -40,7 +41,7 @@ const tomorrow = computeToday(file, fri);
 assert.equal(tomorrow.todaySession, 'Pull A');
 assert.equal(tomorrow.status, null);
 assert.equal(tomorrow.startSession, 'Pull A');
-assert.equal(tomorrow.isGymDay, true);
+assert.equal(tomorrow.isRestDay, false);
 
 // 3. A skipped session does not advance the rotation.
 const skipped = {
@@ -75,40 +76,29 @@ assert.equal(computeToday(sameAgain, fri).todaySession, 'Push A');
 const swapped = { ...file, overrides: { '2026-11-27': { session: 'Legs' } } };
 const swapDay = computeToday(swapped, fri);
 assert.equal(swapDay.todaySession, 'Legs');
-assert.equal(swapDay.isGymDay, true);
+assert.equal(swapDay.isRestDay, false);
 assert.equal(swapDay.status, null);
 
-// 6. Override rest day.
+// 6. Override rest day is the only way to mark a rest day.
 const rest = { ...file, overrides: { '2026-11-27': { rest: true } } };
 const restDay = computeToday(rest, fri);
-assert.equal(restDay.isGymDay, false);
 assert.equal(restDay.isRestDay, true);
+assert.equal(isRestDay(rest, fri), true);
 assert.equal(restDay.todaySession, null);
 assert.equal(restDay.nextSession, 'Pull A');
 assert.equal(restDay.startSession, 'Pull A');
 
-// 7. gymDays set: Thursday is a rest day if it is not in the list.
-const weekdays = { ...file, gymDays: ['Monday', 'Wednesday', 'Friday'] };
-assert.equal(isGymDay(weekdays, thu), false);
-assert.equal(isGymDay(weekdays, fri), true);
-assert.equal(computeToday(weekdays, thu).isRestDay, true);
-// But 26 November already has a done log, so the completed session is still shown.
-assert.equal(computeToday(weekdays, thu).todaySession, 'Push A');
-assert.equal(computeToday(weekdays, thu).status, 'done');
-assert.equal(computeToday(weekdays, thu).nextSession, 'Pull A');
+// 7. A Saturday or Sunday is still Today's workout unless rest is set.
+assert.equal(isRestDay(file, sat), false);
+assert.equal(computeToday(file, sat).todaySession, 'Pull A');
+assert.equal(computeToday(file, sat).isRestDay, false);
+assert.equal(computeToday(file, sat).status, null);
 
-// 8. rest: false forces a gym day on a weekday that is not in gymDays.
-const forced = {
-  ...file,
-  gymDays: ['Monday', 'Wednesday', 'Friday'],
-  overrides: { '2026-11-26': { rest: false, session: 'Pull A' } },
-};
-// 26 November is Thursday. The override forces a gym day, and names Pull A.
-// There is also a log entry for that date (Push A done). Session comes from the override.
-const forcedDay = computeToday(forced, thu);
-assert.equal(forcedDay.isGymDay, true);
-assert.equal(forcedDay.todaySession, 'Pull A');
-assert.equal(forcedDay.status, 'done');
+// 8. weeklyTarget is read from the file, and defaults to 4 to 5.
+assert.deepEqual(weeklyTarget(file), { min: 4, max: 5 });
+assert.deepEqual(weeklyTarget({}), { min: 4, max: 5 });
+assert.equal(formatWeeklyTarget(weeklyTarget({ weeklyTarget: { min: 3, max: 3 } })), '3');
+assert.equal(formatWeeklyTarget(weeklyTarget({ weeklyTarget: { min: 4, max: 5 } })), '4 to 5');
 
 // 9. Rotation wraps after Pull B.
 const wrapped = {

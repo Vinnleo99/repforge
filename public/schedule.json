@@ -2,7 +2,7 @@
   "version": 1,
   "updated": "2026-11-26",
   "rotation": ["Push A", "Pull A", "Legs", "Push B", "Pull B"],
-  "gymDays": [],
+  "weeklyTarget": {"min": 4, "max": 5},
   "homeEquipment": "Pull-up bar, resistance bands, dumbbells, no bench",
   "next": null,
   "sessions": {

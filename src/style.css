@@ -147,9 +147,9 @@ b.big{display:block;font-size:28px;font-weight:600}
 
 /* Today schedule card */
 .today{border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;margin:6px 0 16px}
-.today-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
-.today-date{color:var(--muted);font-size:13px;margin:0 0 2px}
-.today-top h3{margin:0;font-size:17px;font-weight:600}
+.today-date{color:var(--muted);font-size:13px;margin:0 0 8px}
+.today-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.today-top h3{margin:0;font-size:17px;font-weight:600;min-width:0}
 .today-session{margin:0 0 4px;font-size:17px;font-weight:600}
 .today-week,.today-status,.today-extras,.today-equip{color:var(--muted);font-size:14px;margin:0 0 8px}
 .today .label{margin:10px 0 6px}

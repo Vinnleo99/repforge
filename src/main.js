@@ -3,7 +3,7 @@ import {alertBox,confirmBox,promptBox,sheetBox} from './dialog.js';
 import './style.css';
 import { EXERCISES } from './exercises.js';
 import { stats, draw, SIZE, recordVideo } from './share.js';
-import {loadSchedule,computeToday,exercisesForSession,exerciseDetail,workoutNote,matchExercise,readLocation,writeLocation} from './schedule.js';
+import {loadSchedule,computeToday,exercisesForSession,exerciseDetail,workoutNote,matchExercise,readLocation,writeLocation,formatWeeklyTarget} from './schedule.js';
 const KEY='repforge-data-v1';
 const db=Object.assign({workouts:[],routines:[],active:null,profileName:'Victricius'},JSON.parse(localStorage.getItem(KEY)||'{}'));
 const save=()=>localStorage.setItem(KEY,JSON.stringify(db));
@@ -12,9 +12,9 @@ const ui={pages:[],metric:'duration',equip:'All',share:null,tab:'home',view:null
 const exById=id=>EXERCISES.find(e=>e.id===id)||(db.customExercises||[]).find(e=>e.id===id)||{name:id,muscle:'',equipment:''};
 function ensureExercise(name){const hit=matchExercise(name,[...EXERCISES,...(db.customExercises||[])]);if(hit.custom&&!(db.customExercises||[]).some(e=>e.id===hit.id)){(db.customExercises??=[]).push({id:hit.id,name:hit.name,muscle:hit.muscle||'',equipment:hit.equipment||'Other'});save()}return hit.id}
 function todayCard(){if(!scheduleData)return'';const info=computeToday(scheduleData);const loc=ui.location==='home'?'home':'gym';const listed=info.startSession;const exercises=exercisesForSession(scheduleData,listed,loc);const extras=(info.status==='done'&&info.logEntry?.extras)||[];
- const week=info.weeklyDone===1?`1 of ${info.weeklyTarget} sessions completed this week`:`${info.weeklyDone} of ${info.weeklyTarget} sessions completed this week`;
+ const week=`${info.weeklyDone===1?'1':info.weeklyDone} of ${formatWeeklyTarget(info.weeklyTarget)} sessions completed this week`;
  const seg=`<div class="segment" role="tablist" aria-label="Workout location"><button type="button" class="${loc==='gym'?'on':''}" data-a="setLocation" data-v="gym">Gym</button><button type="button" class="${loc==='home'?'on':''}" data-a="setLocation" data-v="home">Home</button></div>`;
- const heading=info.isRestDay?'Today is a rest day':'Today is a gym day';
+ const heading=info.isRestDay?'Today is a rest day':"Today's workout";
  let body='';
  if(info.status==='done'){body+=`<p class="today-status">${esc(info.todaySession)} is completed.</p>`;if(extras.length)body+=`<p class="today-extras">Extra work: ${extras.map(x=>`${esc(x.name)}${x.sets?` (${x.sets} ${x.sets===1?'set':'sets'})`:''}`).join(', ')}.</p>`;if(info.nextSession)body+=`<p class="label">Next up</p><h3 class="today-session">${esc(info.nextSession)}</h3>`}
  else if(info.status==='skipped'){body+=`<p class="today-status">${esc(info.todaySession)} was skipped.</p>`;if(info.nextSession)body+=`<p class="label">Next up</p><h3 class="today-session">${esc(info.nextSession)}</h3>`}
@@ -23,7 +23,7 @@ function todayCard(){if(!scheduleData)return'';const info=computeToday(scheduleD
  const list=exercises.map(ex=>`<li><b>${esc(ex.name)}</b><small>${esc(exerciseDetail(ex))}</small></li>`).join('');
  const start=listed?`<button class="btn primary wide" data-a="startSchedule">Start this workout</button>`:'';
  const equip=loc==='home'&&scheduleData.homeEquipment?`<p class="today-equip">Equipment at home: ${esc(scheduleData.homeEquipment)}.</p>`:'';
- return `<div class="today"><div class="today-top"><div><p class="today-date">${esc(info.displayDate)}</p><h3>${heading}</h3></div>${seg}</div><p class="today-week">${week}</p>${body}${list?`<ul class="today-ex">${list}</ul>`:''}${equip}${start}</div>`}
+ return `<div class="today"><p class="today-date">${esc(info.displayDate)}</p><div class="today-top"><h3>${heading}</h3>${seg}</div><p class="today-week">${week}</p>${body}${list?`<ul class="today-ex">${list}</ul>`:''}${equip}${start}</div>`}
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmtDur=s=>{s=Math.max(0,Math.floor(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?`${h}h ${m}min`:m?`${m}min ${x}s`:`${x}s`};

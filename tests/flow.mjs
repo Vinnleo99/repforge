@@ -13,7 +13,8 @@ async function workout(kg,ss){await p.click('nav >> text=Workout');await p.click
 await shot('01-home-empty');
 await p.click('nav >> text=Workout');
 await p.waitForSelector('.today',{timeout:10000});
-assert(await p.isVisible('text=Today is a gym day')||await p.isVisible('text=Today is a rest day'),'today card heading');
+assert(await p.isVisible("text=Today's workout")||await p.isVisible('text=Today is a rest day'),'today card heading');
+assert(await p.isVisible('text=of 4 to 5 sessions completed this week'),'weekly target wording');
 assert(await p.locator('.today-ex li').count()>0,'today exercise list');
 assert(await p.isVisible('text=Start this workout'));
 await p.click('.segment >> text=Home');
