@@ -1,82 +1,299 @@
 {
   "version": 1,
-  "updated": "2026-11-26",
-  "rotation": ["Push A", "Pull A", "Legs", "Push B", "Pull B"],
-  "weeklyTarget": {"min": 4, "max": 5},
+  "updated": "2026-11-28",
+  "rotation": [
+    "Push A",
+    "Pull A",
+    "Legs",
+    "Push B",
+    "Pull B"
+  ],
+  "weeklyTarget": {
+    "min": 4,
+    "max": 5
+  },
   "homeEquipment": "Pull-up bar, resistance bands, dumbbells, no bench",
   "next": null,
   "sessions": {
     "Push A": [
-      {"name": "Chest press machine", "sets": 3, "reps": "6-8"},
-      {"name": "High-to-low cable fly", "sets": 3, "reps": "10-12", "alternative": "Half-range multi-flight"},
-      {"name": "Shoulder press machine", "sets": 3, "reps": "8-10"},
-      {"name": "Cable lateral raise", "sets": 3, "reps": "10-12"},
-      {"name": "Triceps rope pushdown", "sets": 3, "reps": "8-10"}
+      {
+        "name": "Chest press machine",
+        "sets": 3,
+        "reps": "6-8"
+      },
+      {
+        "name": "High-to-low cable fly",
+        "sets": 3,
+        "reps": "10-12",
+        "alternative": "Half-range multi-flight"
+      },
+      {
+        "name": "Shoulder press machine",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Cable lateral raise",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Triceps rope pushdown",
+        "sets": 3,
+        "reps": "8-10"
+      }
     ],
     "Pull A": [
-      {"name": "Shoulder-width lat pulldown", "sets": 3, "reps": "6-8"},
-      {"name": "Wide-grip chest-supported row", "sets": 3, "reps": "8-10"},
-      {"name": "Single-arm cable row", "sets": 3, "reps": "10-12", "note": "Each side"},
-      {"name": "Hammer curl", "sets": 3, "reps": "8-10"},
-      {"name": "Shrugs", "sets": 3, "reps": "8-10", "note": "With straps"},
-      {"name": "Light wrist curls", "sets": 2, "reps": "15"}
+      {
+        "name": "Shoulder-width lat pulldown",
+        "sets": 3,
+        "reps": "6-8"
+      },
+      {
+        "name": "Wide-grip chest-supported row",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Single-arm cable row",
+        "sets": 3,
+        "reps": "10-12",
+        "note": "Each side"
+      },
+      {
+        "name": "Hammer curl",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Shrugs",
+        "sets": 3,
+        "reps": "8-10",
+        "note": "With straps"
+      },
+      {
+        "name": "Light wrist curls",
+        "sets": 2,
+        "reps": "15"
+      }
     ],
     "Legs": [
-      {"name": "Pendulum squat", "sets": 3, "reps": "10-12"},
-      {"name": "Seated leg curl", "sets": 3, "reps": "10-12"},
-      {"name": "Leg extension", "sets": 3, "reps": "12-15"},
-      {"name": "Seated calf raise", "sets": 3, "reps": "12-15"}
+      {
+        "name": "Pendulum squat",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Seated leg curl",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Leg extension",
+        "sets": 3,
+        "reps": "12-15"
+      },
+      {
+        "name": "Seated calf raise",
+        "sets": 3,
+        "reps": "12-15"
+      }
     ],
     "Push B": [
-      {"name": "Incline chest press machine", "sets": 3, "reps": "8-10"},
-      {"name": "Cable fly or pec deck", "sets": 3, "reps": "10-12"},
-      {"name": "Shoulder press machine", "sets": 3, "reps": "8-10"},
-      {"name": "Lateral raise machine", "sets": 3, "reps": "10-12"},
-      {"name": "Overhead rope triceps extension", "sets": 3, "reps": "10-12"}
+      {
+        "name": "Incline chest press machine",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Cable fly or pec deck",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Shoulder press machine",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Lateral raise machine",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Overhead rope triceps extension",
+        "sets": 3,
+        "reps": "10-12"
+      }
     ],
     "Pull B": [
-      {"name": "Neutral-grip or shoulder-width lat pulldown", "sets": 3, "reps": "8-10"},
-      {"name": "Neutral-grip seated cable row", "sets": 3, "reps": "8-10"},
-      {"name": "Rear delt machine", "sets": 3, "reps": "10-12"},
-      {"name": "Shrugs", "sets": 3, "reps": "8-10"},
-      {"name": "Preacher curl machine", "sets": 3, "reps": "8-10"},
-      {"name": "Cable crunch", "sets": 3, "reps": "12-15"}
+      {
+        "name": "Neutral-grip or shoulder-width lat pulldown",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Neutral-grip seated cable row",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Rear delt machine",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Shrugs",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Preacher curl machine",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Cable crunch",
+        "sets": 3,
+        "reps": "12-15"
+      }
     ]
   },
   "homeSessions": {
     "Push A": [
-      {"name": "Band chest press", "sets": 3, "reps": "8-10"},
-      {"name": "Dumbbell floor press, neutral grip", "sets": 3, "reps": "6-10"},
-      {"name": "Seated dumbbell shoulder press, neutral grip", "sets": 3, "reps": "8-10"},
-      {"name": "Dumbbell lateral raise", "sets": 3, "reps": "10-12"},
-      {"name": "Band triceps pushdown", "sets": 3, "reps": "10-12"}
+      {
+        "name": "Band chest press",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Dumbbell floor press, neutral grip",
+        "sets": 3,
+        "reps": "6-10"
+      },
+      {
+        "name": "Seated dumbbell shoulder press, neutral grip",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Dumbbell lateral raise",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Band triceps pushdown",
+        "sets": 3,
+        "reps": "10-12"
+      }
     ],
     "Pull A": [
-      {"name": "Pull-ups, neutral or shoulder-width grip", "sets": 3, "reps": "6-10", "note": "Band-assisted if needed"},
-      {"name": "Dumbbell one-arm row, other hand on a chair", "sets": 3, "reps": "8-10", "note": "Each side"},
-      {"name": "Dumbbell shrugs", "sets": 3, "reps": "8-10", "note": "Straps if available"},
-      {"name": "Dumbbell hammer curl", "sets": 3, "reps": "8-10"}
+      {
+        "name": "Pull-ups, neutral or shoulder-width grip",
+        "sets": 3,
+        "reps": "6-10",
+        "note": "Band-assisted if needed"
+      },
+      {
+        "name": "Dumbbell one-arm row, other hand on a chair",
+        "sets": 3,
+        "reps": "8-10",
+        "note": "Each side"
+      },
+      {
+        "name": "Dumbbell shrugs",
+        "sets": 3,
+        "reps": "8-10",
+        "note": "Straps if available"
+      },
+      {
+        "name": "Dumbbell hammer curl",
+        "sets": 3,
+        "reps": "8-10"
+      }
     ],
     "Legs": [
-      {"name": "Dumbbell goblet squat", "sets": 3, "reps": "10-12"},
-      {"name": "Dumbbell Romanian deadlift", "sets": 3, "reps": "8-10"},
-      {"name": "Dumbbell split squat", "sets": 3, "reps": "8-10", "note": "Each leg"},
-      {"name": "Standing calf raise holding a dumbbell", "sets": 3, "reps": "12-15"}
+      {
+        "name": "Dumbbell goblet squat",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Dumbbell Romanian deadlift",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Dumbbell split squat",
+        "sets": 3,
+        "reps": "8-10",
+        "note": "Each leg"
+      },
+      {
+        "name": "Standing calf raise holding a dumbbell",
+        "sets": 3,
+        "reps": "12-15"
+      }
     ],
     "Push B": [
-      {"name": "Band incline press", "sets": 3, "reps": "8-10", "alternative": "Feet-elevated push-up on dumbbell handles"},
-      {"name": "Band chest fly", "sets": 3, "reps": "10-12"},
-      {"name": "Dumbbell Arnold press", "sets": 3, "reps": "8-10"},
-      {"name": "Band lateral raise", "sets": 3, "reps": "12-15"},
-      {"name": "Overhead dumbbell triceps extension", "sets": 3, "reps": "10-12"}
+      {
+        "name": "Band incline press",
+        "sets": 3,
+        "reps": "8-10",
+        "alternative": "Feet-elevated push-up on dumbbell handles"
+      },
+      {
+        "name": "Band chest fly",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Dumbbell Arnold press",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Band lateral raise",
+        "sets": 3,
+        "reps": "12-15"
+      },
+      {
+        "name": "Overhead dumbbell triceps extension",
+        "sets": 3,
+        "reps": "10-12"
+      }
     ],
     "Pull B": [
-      {"name": "Chin-ups or neutral-grip pull-ups", "sets": 3, "reps": "6-10"},
-      {"name": "Band seated row", "sets": 3, "reps": "10-12"},
-      {"name": "Band face pull", "sets": 3, "reps": "12-15"},
-      {"name": "Dumbbell rear delt raise", "sets": 3, "reps": "10-12"},
-      {"name": "Dumbbell shrugs", "sets": 3, "reps": "8-10"},
-      {"name": "Hanging knee raise on the pull-up bar", "sets": 3, "reps": "10-12"}
+      {
+        "name": "Chin-ups or neutral-grip pull-ups",
+        "sets": 3,
+        "reps": "6-10"
+      },
+      {
+        "name": "Band seated row",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Band face pull",
+        "sets": 3,
+        "reps": "12-15"
+      },
+      {
+        "name": "Dumbbell rear delt raise",
+        "sets": 3,
+        "reps": "10-12"
+      },
+      {
+        "name": "Dumbbell shrugs",
+        "sets": 3,
+        "reps": "8-10"
+      },
+      {
+        "name": "Hanging knee raise on the pull-up bar",
+        "sets": 3,
+        "reps": "10-12"
+      }
     ]
   },
   "log": [
@@ -85,8 +302,16 @@
       "session": "Push A",
       "status": "done",
       "extras": [
-        {"name": "Machine biceps curl", "sets": 2}
+        {
+          "name": "Machine biceps curl",
+          "sets": 2
+        }
       ]
+    },
+    {
+      "date": "2026-11-27",
+      "session": "Pull A",
+      "status": "done"
     }
   ],
   "overrides": {}
